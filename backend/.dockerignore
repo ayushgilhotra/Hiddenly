@@ -1,0 +1,17 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/resources/db/migration/*.sql
+
+# Sensitive files
+.env
+application-local.properties
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+.nb-gradle/
+bin/
