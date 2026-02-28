@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Secret Spot | Hiddenly</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav>
+        <a href="index.html" class="brand">Hiddenly</a>
+        <ul class="nav-links">
+            <li><a href="explore.html">Explore</a></li>
+            <li><a href="#" id="logout-link" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container" style="max-width: 600px;">
+        <h1 class="text-center">Share a Hidden Gem</h1>
+        <p class="text-center" style="color: var(--text-muted); margin-bottom: 40px;">Help others discover what you
+            found.</p>
+
+        <form id="add-spot-form"
+            style="background: var(--card-bg); padding: 40px; border-radius: var(--border-radius);">
+            <div class="form-group">
+                <label for="name">Spot Name</label>
+                <input type="text" id="name" required placeholder="e.g. The Blue Library Cafe">
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location / Address</label>
+                <input type="text" id="location" required placeholder="e.g. Bandra West, Mumbai">
+            </div>
+
+            <div style="display: flex; gap: 20px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="category">Category</label>
+                    <select id="category" required>
+                        <option value="CAFE">Cafe</option>
+                        <option value="NATURE">Nature</option>
+                        <option value="FOOD">Street Food</option>
+                        <option value="ADVENTURE">Adventure</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="budget">Budget Range</label>
+                    <select id="budget" required>
+                        <option value="Under ₹200">Under ₹200</option>
+                        <option value="Under ₹500">Under ₹500</option>
+                        <option value="₹500+">₹500+</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="imageUrl">Image URL (Optional)</label>
+                <input type="url" id="imageUrl" placeholder="Paste an image link from the web">
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Tip: Leave blank to use a
+                    default image.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description (Secrets/Tips)</label>
+                <textarea id="description" rows="5" required
+                    placeholder="Tell us why this place is hidden/special..."></textarea>
+            </div>
+
+            <button type="submit" style="width: 100%; margin-top: 10px;">Post Secret Spot</button>
+        </form>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+        // Check if logged in, if not redirect
+        document.addEventListener('DOMContentLoaded', checkAuth);
+
+        document.getElementById('add-spot-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Default images mapping based on category
+            const defaultImages = {
+                'CAFE': 'https://images.unsplash.com/photo-1554118811-1e0d58224f24', // Coffee shop
+                'NATURE': 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e', // Green landscape
+                'FOOD': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836', // Delicious street food
+                'ADVENTURE': 'https://images.unsplash.com/photo-1533240332313-0bc499f50e10' // Mountain hiking
+            };
+
+            // Get selected category
+            const selectedCategory = document.getElementById('category').value;
+
+            // Get image URL or use a category-specific default placeholder if empty
+            let inputImageUrl = document.getElementById('imageUrl').value.trim();
+            if (!inputImageUrl) {
+                inputImageUrl = defaultImages[selectedCategory] || defaultImages['NATURE'];
+            }
+
+            const spotData = {
+                name: document.getElementById('name').value,
+                location: document.getElementById('location').value,
+                category: selectedCategory,
+                budgetRange: document.getElementById('budget').value,
+                imageUrl: inputImageUrl,
+                description: document.getElementById('description').value
+            };
+
+            try {
+                await api.addSpot(spotData);
+                showAlert('Spot added successfully!');
+                navigateTo('explore.html');
+            } catch (error) {
+                showAlert(error.message, 'error');
+            }
+        });
+    </script>
+</body>
+
+</html>

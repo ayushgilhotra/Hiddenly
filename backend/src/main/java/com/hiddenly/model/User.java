@@ -1,49 +1,64 @@
 package com.hiddenly.model;
 
 import jakarta.persistence.*;
-import lombok.*;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
-/**
- * LEARNING NOTE:
- * @Entity marks this class as a JPA entity that maps to a database table.
- * @Table specifies the name of the table in the database.
- * Lombok's @Data, @NoArgsConstructor, and @AllArgsConstructor generate boilerplate code like getters, setters, and constructors automatically.
- */
+// This class represents the 'users' table in our MySQL database.
+// The @Entity annotation tells Spring Data JPA that this class should be mapped to a table.
 @Entity
-@Table(name = "users")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Table(name = "users") // We explicitly name the table 'users'
 public class User {
 
-    @Id // Marks this field as the primary key
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Database handles ID generation (auto-increment)
+    // This is the primary key (id) for our user.
+    // @Id marks it as the unique identifier.
+    // @GeneratedValue means it will automatically increment (1, 2, 3...) in the database.
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100) // Column constraints (not null, length)
+    // The user's full name.
+    @Column(nullable = false) // 'nullable = false' means this field is required
     private String name;
 
-    @Column(nullable = false, unique = true, length = 150) // Emails must be unique
+    // The user's email, which must be unique (no two users can have the same email).
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false) // Passwords are required
+    // The user's password (this will be stored as an encrypted string).
+    @Column(nullable = false)
     private String password;
 
-    @Column(name = "profile_photo")
-    private String profilePhoto;
+    // The date and time when the user was created.
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(columnDefinition = "TEXT")
-    private String bio;
+    // --- CONSTRUCTORS (How we create a User object) ---
 
-    @Column(name = "created_at", updatable = false)
-    private ZonedDateTime createdAt;
+    // A default constructor is REQUIRED by JPA
+    public User() {}
 
-    @PrePersist // Runs before the entity is saved to the database for the first time
-    protected void onCreate() {
-        createdAt = ZonedDateTime.now();
+    // A constructor with parameters to make it easy to create a new user
+    public User(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
     }
+
+    // --- GETTERS AND SETTERS (How we read and write the private fields) ---
+    // We use these because our fields are private (a concept called Encapsulation)
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

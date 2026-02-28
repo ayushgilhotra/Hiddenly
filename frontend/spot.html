@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spot Details | Hiddenly</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav>
+        <a href="index.html" class="brand">Hiddenly</a>
+        <ul class="nav-links">
+            <li><a href="explore.html">Explore</a></li>
+            <li><a href="add-spot.html" id="add-spot-link" class="hidden">Add a Spot</a></li>
+            <li><a href="login.html" id="login-link">Login</a></li>
+            <li><a href="register.html" id="register-link" class="btn-auth">Register</a></li>
+            <li id="user-name" class="hidden" style="color: var(--primary); font-weight: bold;"></li>
+            <li><a href="#" id="logout-link" class="hidden" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <section class="container" style="max-width: 900px;">
+        <button onclick="window.history.back()"
+            style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); margin-bottom: 20px;">
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
+
+        <div style="background: var(--card-bg); border-radius: var(--border-radius); overflow: hidden;">
+            <img id="spot-image" src="" alt="" style="width: 100%; height: 400px; object-fit: cover;">
+
+            <div style="padding: 40px;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <span id="spot-category" class="badge badge-category">CATEGORY</span>
+                        <h1 id="spot-name" style="margin-top: 10px; font-size: 2.5rem;">Spot Name</h1>
+                        <p style="font-size: 1.1rem; color: var(--text-muted);">
+                            <i class="fas fa-map-marker-alt"></i> <span id="spot-location">Location</span>
+                        </p>
+                    </div>
+
+                    <div id="owner-controls" class="hidden" style="display: flex; gap: 10px;">
+                        <!-- Using alert for simple edit flow since it's a beginner project -->
+                        <button onclick="showAlert('Edit feature coming soon!')"
+                            style="background: var(--card-bg); color: var(--text); border: 1px solid var(--primary);">Edit</button>
+                        <button onclick="handleDeleteSpot()" style="background: #e74c3c; color: white;">Delete</button>
+                    </div>
+                </div>
+
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-top: 40px; border-top: 1px solid rgba(212, 168, 83, 0.1); padding-top: 30px;">
+                    <div>
+                        <h4 style="margin-bottom: 5px; color: var(--text-muted);">Budget Range</h4>
+                        <p id="spot-budget" style="font-weight: bold;">-</p>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 5px; color: var(--text-muted);">Added By</h4>
+                        <p id="spot-added-by" style="font-weight: bold;">-</p>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 5px; color: var(--text-muted);">Discovery Date</h4>
+                        <p id="spot-date" style="font-weight: bold;">-</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px;">
+                    <h3 style="margin-bottom: 15px;">The Story</h3>
+                    <p id="spot-description" style="white-space: pre-line; line-height: 1.8;">-</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CORE SCRIPTS -->
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/spots.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', loadSpotDetails);
+    </script>
+</body>
+
+</html>

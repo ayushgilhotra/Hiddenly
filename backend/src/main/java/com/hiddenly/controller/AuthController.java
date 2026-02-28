@@ -1,37 +1,49 @@
 package com.hiddenly.controller;
 
-import com.hiddenly.dto.AuthRequest;
-import com.hiddenly.dto.AuthResponse;
+import com.hiddenly.dto.LoginRequest;
 import com.hiddenly.dto.RegisterRequest;
 import com.hiddenly.service.AuthService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-/**
- * LEARNING NOTE:
- * This is a REST Controller. @RestController means every method returns JSON automatically.
- * @RequestMapping sets the base URL for all routes in this class.
- * We separate Controller (receives request) from Service (does the logic) from Repository (talks to DB).
- * This pattern is called "Separation of Concerns" - a key software design principle.
- */
+import java.util.Map;
+
+// This controller handles all requests related to Users (Registration and Login)
+// @RestController means this class will send back data (JSON), not HTML pages.
+// @RequestMapping("/api/auth") means all URLs in this class start with /api/auth
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+    @Autowired
+    private AuthService authService;
 
+    // --- API: Register a new user ---
+    // URL: POST http://localhost:8080/api/auth/register
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(authService.register(request));
+    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+        try {
+            String message = authService.register(request);
+            // Return 200 OK with success message
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            // Return 400 Bad Request if something goes wrong (like email already exists)
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
+    // --- API: Login an existing user ---
+    // URL: POST http://localhost:8080/api/auth/login
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest request) {
-        return ResponseEntity.ok(authService.authenticate(request));
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            Map<String, String> response = authService.login(request);
+            // Return 200 OK with the token and user name
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            // Return 401 Unauthorized if login fails
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
     }
 }

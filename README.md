@@ -1,76 +1,88 @@
-# Hiddenly - Discover Hidden Gems 🗺️✨
+# Hiddenly - Discover Hidden Gems 🧭
 
-Hiddenly is a digital explorer's journal where users find, share, and explore hidden cafes, budget food spots, and secret local places. Built with a premium "explorer-journal" aesthetic.
+Hiddenly is a beginner-friendly full-stack web application built for explorers to share and discover secret cafes, budget spots, and quiet nature places across India.
 
-## ✨ Features
-- **Discover**: Full-screen landing with categories and trending spots.
-- **Explore**: Split-view map and list to find spots nearby.
-- **Share**: Multi-step journal entry form for new spots.
-- **Personal Journal**: Save spots to wishlist and manage your shared entries.
-- **Secure**: JWT-based authentication with Access and Refresh tokens.
-- **Aesthetic**: Dark charcoal palette with golden accents and frosted glass effects.
-
-## 🛠️ Tech Stack
-
-### Backend
-- **Java 17 / Spring Boot 3**: Core framework
-- **Spring Security + JWT**: Stateless authentication
-- **PostgreSQL**: Primary database
-- **Flyway**: Database migrations
-- **Cloudinary**: Image management
-- **Swagger / OpenAPI**: API Documentation
-
-### Frontend
-- **React 18 + Vite**: Modern frontend library and build tool
-- **Tailwind CSS**: Utility-first styling
-- **TanStack Query (React Query)**: Data fetching and caching
-- **Framer Motion**: Premium micro-animations
-- **Lucide React**: Iconography
-
-## 🚀 Getting Started
-
-### Prerequisites
-- JDK 17+
-- Node.js 18+
-- **Docker Desktop** (Recommended for easiest database setup)
-- Cloudinary Account & Google Maps API Key
-
-### Database Setup (Using Docker)
-If you have Docker Desktop installed, you don't need to install PostgreSQL manually:
-1. Open a terminal in the project root.
-2. Run: `docker-compose up -d`
-   - This starts PostgreSQL on port 5432 and **pgAdmin** on port 5050.
-   - Database: `hiddenly` | User: `postgres` | Password: `password`
-
-### Backend Setup
-1. Navigate to `/backend`
-2. Configure your database in `src/main/resources/application.properties` (The defaults already match the Docker setup!)
-3. Set environment variables:
-   ```env
-   DB_PASSWORD=your_password
-   JWT_SECRET=your_32_char_secret
-   CLOUDINARY_CLOUD_NAME=name
-   CLOUDINARY_API_KEY=key
-   CLOUDINARY_API_SECRET=secret
-   ```
-4. Run: `./mvnw spring-boot:run`
-
-### Frontend Setup
-1. Navigate to `/frontend`
-2. Install dependencies: `npm install`
-3. Create `.env` file:
-   ```env
-   VITE_API_URL=http://localhost:8080/api
-   VITE_GOOGLE_MAPS_KEY=your_key
-   ```
-4. Run: `npm run dev`
-
-## 📖 Learning Notes
-This project is designed for beginners. Every file contains detailed inline comments explaining the software design patterns used:
-- **Separation of Concerns**: (Controller -> Service -> Repository)
-- **DTO Pattern**: Safe data transfer between layers.
-- **Stateless Auth**: Using JWTs over Session IDs.
-- **Declarative UI**: React's component-based architecture.
+## 🚀 Key Features
+- **Exploration**: Browse hidden spots by category (Cafes, Nature, Food, Adventure).
+- **Security**: JWT-based login and registration system.
+- **Contributions**: Logged-in users can share their own discoveries.
+- **Management**: Users can edit or delete spots they have added.
+- **Sample Data**: Pre-loaded with 8 realistic Indian hidden gems.
 
 ---
-Built for Explorers, by Explorers. 🧭
+
+## 🛠️ Tech Stack (Beginner Friendly)
+
+### Backend
+- **Java 17** & **Spring Boot 3**
+- **Spring Data JPA** (Database interaction)
+- **Spring Security** & **JWT** (Authentication)
+- **MySQL** (Database)
+- **Maven** (Dependency management)
+
+### Frontend
+- **Vanilla HTML5 & CSS3** (No frameworks)
+- **Vanilla JavaScript** (Modern ES6 with `fetch` API)
+- **Google Fonts** & **Font Awesome**
+
+---
+
+## 📁 Project Structure
+```texts
+hiddenly/
+├── backend/                  # Spring Boot Project
+│   ├── src/main/java/        # Java Source Code
+│   ├── src/main/resources/   # App settings and sample data
+│   └── pom.xml               # Dependencies
+└── frontend/                 # Vanilla Web Frontend
+    ├── css/                  # Stylesheets
+    ├── js/                   # Logical scripts
+    └── *.html                # Interface pages
+```
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Database Setup (MySQL)
+1. Open your MySQL terminal or Workbench.
+2. Create a database named `hiddenly_db`:
+   ```sql
+   CREATE DATABASE hiddenly_db;
+   ```
+3. Update `backend/src/main/resources/application.properties` with your MySQL `username` and `password`.
+
+### 2. Run the Backend
+1. Open the `backend/` folder in your IDE (IntelliJ, Eclipse, or VS Code).
+2. Wait for Maven to download dependencies.
+3. Run `HiddenlyApplication.java`.
+4. The server will start on `http://localhost:8080`.
+
+### 3. Open the Frontend
+1. Simply go to the `frontend/` folder.
+2. Double-click `index.html` to open it in your browser.
+3. **Note**: The backend MUST be running for the frontend to show data.
+
+---
+
+## 🛡️ API Endpoints
+
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| POST | `/api/auth/register` | Create a new account | Public |
+| POST | `/api/auth/login` | Login and get JWT token | Public |
+| GET | `/api/spots` | Get all hidden spots | Public |
+| GET | `/api/spots/{id}` | Get details of a spot | Public |
+| POST | `/api/spots` | Share a new spot | User |
+| PUT | `/api/spots/{id}` | Update a spot | Owner |
+| DELETE| `/api/spots/{id}` | Remove a spot | Owner |
+
+---
+
+## 📖 Beginner Friendly Code
+This project is designed for learning. You will find:
+- **Detailed comments** on every file explaining the "Why".
+- **Simple logic** avoids complex design patterns.
+- **Clear structure** mapping 1:1 with real-world entities.
+
+Happy Exploring! 🕵️‍♂️

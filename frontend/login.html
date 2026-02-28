@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Hiddenly</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <nav>
+        <a href="index.html" class="brand">Hiddenly</a>
+        <ul class="nav-links">
+            <li><a href="explore.html">Explore</a></li>
+            <li><a href="register.html">Register</a></li>
+        </ul>
+    </nav>
+
+    <div class="auth-form">
+        <h2 class="text-center">Welcome Back</h2>
+        <p class="text-center" style="color: var(--text-muted); margin-bottom: 30px;">Login to share your hidden spots
+        </p>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" required placeholder="your@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="••••••••">
+            </div>
+
+            <button type="submit" style="width: 100%;">Login to Explore</button>
+        </form>
+
+        <p class="text-center mt-20" style="font-size: 0.9rem;">
+            Don't have an account? <a href="register.html" style="color: var(--primary);">Register here</a>
+        </p>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await api.login({ email, password });
+
+                // Save login info to localStorage
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('userName', response.userName);
+
+                showAlert('Login successful! Welcome to Hiddenly.');
+                navigateTo('index.html');
+            } catch (error) {
+                showAlert(error.message, 'error');
+            }
+        });
+    </script>
+</body>
+
+</html>
