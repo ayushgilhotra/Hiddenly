@@ -10,6 +10,7 @@ public class SpotRequest {
     private String category;
     private String budgetRange;
     private String imageUrl;
+    private Integer personsCount;
 
     // --- GETTERS AND SETTERS ---
 
@@ -30,4 +31,7 @@ public class SpotRequest {
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public Integer getPersonsCount() { return personsCount; }
+    public void setPersonsCount(Integer personsCount) { this.personsCount = personsCount; }
 }

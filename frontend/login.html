@@ -15,10 +15,10 @@
 <body>
 
     <nav>
-        <a href="index.html" class="brand">Hiddenly</a>
+        <a href="index" class="brand">Hiddenly</a>
         <ul class="nav-links">
-            <li><a href="explore.html">Explore</a></li>
-            <li><a href="register.html">Register</a></li>
+            <li><a href="explore">Explore</a></li>
+            <li><a href="register">Register</a></li>
         </ul>
     </nav>
 
@@ -42,7 +42,7 @@
         </form>
 
         <p class="text-center mt-20" style="font-size: 0.9rem;">
-            Don't have an account? <a href="register.html" style="color: var(--primary);">Register here</a>
+            Don't have an account? <a href="register" style="color: var(--primary);">Register here</a>
         </p>
     </div>
 
@@ -65,7 +65,7 @@
                 localStorage.setItem('userName', response.userName);
 
                 showAlert('Login successful! Welcome to Hiddenly.');
-                navigateTo('index.html');
+                navigateTo('index');
             } catch (error) {
                 showAlert(error.message, 'error');
             }

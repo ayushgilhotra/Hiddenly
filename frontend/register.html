@@ -15,10 +15,10 @@
 <body>
 
     <nav>
-        <a href="index.html" class="brand">Hiddenly</a>
+        <a href="index" class="brand">Hiddenly</a>
         <ul class="nav-links">
-            <li><a href="explore.html">Explore</a></li>
-            <li><a href="login.html">Login</a></li>
+            <li><a href="explore">Explore</a></li>
+            <li><a href="login">Login</a></li>
         </ul>
     </nav>
 
@@ -47,7 +47,7 @@
         </form>
 
         <p class="text-center mt-20" style="font-size: 0.9rem;">
-            Already have an account? <a href="login.html" style="color: var(--primary);">Login here</a>
+            Already have an account? <a href="login" style="color: var(--primary);">Login here</a>
         </p>
     </div>
 
@@ -66,7 +66,7 @@
             try {
                 await api.register({ name, email, password });
                 showAlert('Registration successful! You can now login.');
-                navigateTo('login.html');
+                navigateTo('login');
             } catch (error) {
                 showAlert(error.message, 'error');
             }

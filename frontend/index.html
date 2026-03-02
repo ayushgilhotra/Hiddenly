@@ -1,27 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hiddenly | Discover Hidden Gems</title>
-    
+
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Main Styles -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
 
     <!-- NAVBAR -->
     <nav>
-        <a href="index.html" class="brand">Hiddenly</a>
+        <a href="index" class="brand">Hiddenly</a>
         <ul class="nav-links">
-            <li><a href="explore.html">Explore</a></li>
-            <li><a href="add-spot.html" id="add-spot-link" class="hidden">Add a Spot</a></li>
-            <li><a href="login.html" id="login-link">Login</a></li>
-            <li><a href="register.html" id="register-link" class="btn-auth">Register</a></li>
+            <li><a href="explore">Explore</a></li>
+            <li><a href="add-spot" id="add-spot-link" class="hidden">Add a Spot</a></li>
+            <li><a href="login" id="login-link">Login</a></li>
+            <li><a href="register" id="register-link" class="btn-auth">Register</a></li>
             <li id="user-name" class="hidden" style="color: var(--primary); font-weight: bold;"></li>
             <li><a href="#" id="logout-link" class="hidden" onclick="logout()">Logout</a></li>
         </ul>
@@ -31,10 +35,11 @@
     <header class="hero">
         <h1>Discover Hidden Gems <br> Near You</h1>
         <p>Uncover the secret cafes, quiet nature spots, and budget-friendly treasures others might miss.</p>
-        
+
         <div class="search-container">
             <input type="text" id="home-search" placeholder="Search by name (e.g. Art Cafe)...">
-            <button onclick="window.location.href='explore.html?search=' + document.getElementById('home-search').value">Search</button>
+            <button
+                onclick="window.location.href='explore?search=' + document.getElementById('home-search').value">Search</button>
         </div>
     </header>
 
@@ -42,11 +47,16 @@
     <section class="container text-center">
         <h2>Browse by Category</h2>
         <div class="mt-20" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-            <button onclick="navigateTo('explore.html?category=ALL')" style="background: var(--card-bg); color: var(--text); border: 1px solid var(--primary);">All</button>
-            <button onclick="navigateTo('explore.html?category=CAFE')" style="background: var(--card-bg); color: var(--text); border: 1px solid var(--primary);">Cafes</button>
-            <button onclick="navigateTo('explore.html?category=NATURE')" style="background: var(--card-bg); color: var(--text); border: 1px solid var(--primary);">Nature</button>
-            <button onclick="navigateTo('explore.html?category=FOOD')" style="background: var(--card-bg); color: var(--text); border: 1px solid var(--primary);">Food</button>
-            <button onclick="navigateTo('explore.html?category=ADVENTURE')" style="background: var(--card-bg); color: var(--text); border: 1px solid var(--primary);">Adventure</button>
+            <button onclick="navigateTo('explore?category=ALL')"
+                style="background: var(--card-bg); color: var(--text); border: 1px solid var(--primary);">All</button>
+            <button onclick="navigateTo('explore?category=CAFE')"
+                style="background: var(--card-bg); color: var(--text); border: 1px solid var(--primary);">Cafes</button>
+            <button onclick="navigateTo('explore?category=NATURE')"
+                style="background: var(--card-bg); color: var(--text); border: 1px solid var(--primary);">Nature</button>
+            <button onclick="navigateTo('explore?category=FOOD')"
+                style="background: var(--card-bg); color: var(--text); border: 1px solid var(--primary);">Food</button>
+            <button onclick="navigateTo('explore?category=ADVENTURE')"
+                style="background: var(--card-bg); color: var(--text); border: 1px solid var(--primary);">Adventure</button>
         </div>
     </section>
 
@@ -54,7 +64,7 @@
     <section class="container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2>Latest Discoveries</h2>
-            <a href="explore.html" style="color: var(--primary);">View All <i class="fas fa-arrow-right"></i></a>
+            <a href="explore" style="color: var(--primary);">View All <i class="fas fa-arrow-right"></i></a>
         </div>
         <div id="home-spots-grid" class="grid">
             <!-- Spots will be loaded here by JavaScript -->
@@ -63,7 +73,8 @@
     </section>
 
     <!-- FOOTER -->
-    <footer class="text-center" style="padding: 40px; color: var(--text-muted); border-top: 1px solid rgba(212, 168, 83, 0.1);">
+    <footer class="text-center"
+        style="padding: 40px; color: var(--text-muted); border-top: 1px solid rgba(212, 168, 83, 0.1);">
         <p>&copy; 2025 Hiddenly. Built for explorers.</p>
     </footer>
 
@@ -72,10 +83,11 @@
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/spots.js"></script>
-    
+
     <script>
         // When the page finishes loading, get the latest spots
         document.addEventListener('DOMContentLoaded', loadHomeSpots);
     </script>
 </body>
+
 </html>

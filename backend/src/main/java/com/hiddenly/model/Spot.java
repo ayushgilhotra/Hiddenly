@@ -40,6 +40,10 @@ public class Spot {
     @Column(name = "image_url", length = 1000)
     private String imageUrl;
 
+    // The recommended number of persons for this spot.
+    @Column(name = "persons_count")
+    private Integer personsCount;
+
     // The user who added this spot.
     // @ManyToOne means many spots can be added by one user.
     // @JoinColumn specifies the foreign key column name in the database.
@@ -93,6 +97,9 @@ public class Spot {
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public Integer getPersonsCount() { return personsCount; }
+    public void setPersonsCount(Integer personsCount) { this.personsCount = personsCount; }
 
     public User getAddedBy() { return addedBy; }
     public void setAddedBy(User addedBy) { this.addedBy = addedBy; }
