@@ -5,7 +5,7 @@ function createSpotCard(spot) {
     // We use a template string (backticks) to build the HTML
     return `
         <div class="card" onclick="navigateTo('spot.html?id=${spot.id}')">
-            <img src="${spot.imageUrl}" alt="${spot.name}" class="card-img" onerror="this.src='https://images.unsplash.com/photo-1542332213-9b5a5a3fad35'">
+            <img src="${spot.imageUrl}" alt="${spot.name}" class="card-img" onerror="if(!this.dataset.tried) { this.dataset.tried=true; this.src='https://images.unsplash.com/photo-1542332213-9b5a5a3fad35'; }">
             <div class="card-content">
                 <span class="badge badge-category">${spot.category}</span>
                 <h3 class="mt-20">${spot.name}</h3>

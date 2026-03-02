@@ -48,6 +48,7 @@
                         <option value="NATURE">Nature</option>
                         <option value="FOOD">Street Food</option>
                         <option value="ADVENTURE">Adventure</option>
+                        <option value="OTHER">Other</option>
                     </select>
                 </div>
                 <div class="form-group" style="flex: 1;">
@@ -88,29 +89,12 @@
         document.getElementById('add-spot-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Default images mapping based on category
-            const defaultImages = {
-                'CAFE': 'https://images.unsplash.com/photo-1554118811-1e0d58224f24', // Coffee shop
-                'NATURE': 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e', // Green landscape
-                'FOOD': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836', // Delicious street food
-                'ADVENTURE': 'https://images.unsplash.com/photo-1533240332313-0bc499f50e10' // Mountain hiking
-            };
-
-            // Get selected category
-            const selectedCategory = document.getElementById('category').value;
-
-            // Get image URL or use a category-specific default placeholder if empty
-            let inputImageUrl = document.getElementById('imageUrl').value.trim();
-            if (!inputImageUrl) {
-                inputImageUrl = defaultImages[selectedCategory] || defaultImages['NATURE'];
-            }
-
             const spotData = {
                 name: document.getElementById('name').value,
                 location: document.getElementById('location').value,
-                category: selectedCategory,
+                category: document.getElementById('category').value,
                 budgetRange: document.getElementById('budget').value,
-                imageUrl: inputImageUrl,
+                imageUrl: document.getElementById('imageUrl').value.trim(),
                 description: document.getElementById('description').value
             };
 
