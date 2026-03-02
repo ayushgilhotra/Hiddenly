@@ -24,3 +24,6 @@ run.log
 # OS
 .DS_Store
 Thumbs.db
+
+# Database
+data/
