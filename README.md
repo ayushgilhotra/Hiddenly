@@ -4,10 +4,13 @@ Hiddenly is a beginner-friendly full-stack web application built for explorers t
 
 ## 🚀 Key Features
 - **Exploration**: Browse hidden spots by category (Cafes, Nature, Food, Adventure).
+- **Interactive Maps**: Full screen map view with markers and popup info windows.
+- **Smart Search**: Find spots near your current location (10km radius).
+- **Pin Drop**: Mark exact spot locations while adding new gems with reverse geocoding.
+- **Directions**: One-click navigation to secret spots via Google Maps.
 - **Security**: JWT-based login and registration system.
 - **Contributions**: Logged-in users can share their own discoveries.
 - **Management**: Users can edit or delete spots they have added.
-- **Sample Data**: Pre-loaded with 8 realistic Indian hidden gems.
 
 ---
 
@@ -62,6 +65,20 @@ hiddenly/
 1. Simply go to the `frontend/` folder.
 2. Double-click `index.html` to open it in your browser.
 3. **Note**: The backend MUST be running for the frontend to show data.
+
+### 4. Google Maps Setup (MANDATORY)
+To use the maps features, you need a Google Maps API Key:
+1. Go to [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a project and enable:
+   - **Maps JavaScript API**
+   - **Places API**
+   - **Geocoding API**
+3. Create an API Key in "Credentials".
+4. Open the following HTML files and replace `YOUR_GOOGLE_MAPS_API_KEY` with your actual key:
+   - `frontend/index.html`
+   - `frontend/explore.html`
+   - `frontend/add-spot.html`
+   - `frontend/spot.html`
 
 ---
 

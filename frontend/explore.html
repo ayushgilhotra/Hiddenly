@@ -28,56 +28,93 @@
         </ul>
     </nav>
 
-    <section class="container">
-        <h1 id="explore-title">Explore all Hidden Gems</h1>
+    <!-- SPLIT LAYOUT CONTAINER -->
+    <main class="explore-container">
+        <!-- LEFT SIDE: CARDS & FILTERS (40%) -->
+        <section class="explore-sidebar">
+            <h1 id="explore-title">Explore Hidden Gems</h1>
 
-        <!-- FILTER BAR -->
-        <div
-            style="background: var(--card-bg); padding: 20px; border-radius: var(--border-radius); margin-bottom: 30px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
-            <div style="flex: 1; min-width: 200px;">
-                <label
-                    style="display: block; margin-bottom: 5px; font-size: 0.8rem; color: var(--text-muted);">Category</label>
-                <select id="filter-category" onchange="navigateTo('explore?category=' + this.value)">
-                    <option value="ALL">All Categories</option>
-                    <option value="CAFE">Cafes</option>
-                    <option value="NATURE">Nature</option>
-                    <option value="FOOD">Food</option>
-                    <option value="ADVENTURE">Adventure</option>
-                    <option value="OTHER">Other</option>
-                </select>
+            <!-- FILTER BAR -->
+            <div
+                style="background: var(--card-bg); padding: 15px; border-radius: var(--border-radius); margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+                <div>
+                    <label
+                        style="display: block; margin-bottom: 5px; font-size: 0.8rem; color: var(--text-muted);">Category</label>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="filter-btn active" data-category="ALL"
+                            onclick="filterByCategory('ALL')">All</button>
+                        <button class="filter-btn" data-category="CAFE" onclick="filterByCategory('CAFE')">Cafe</button>
+                        <button class="filter-btn" data-category="NATURE"
+                            onclick="filterByCategory('NATURE')">Nature</button>
+                        <button class="filter-btn" data-category="FOOD" onclick="filterByCategory('FOOD')">Food</button>
+                        <button class="filter-btn" data-category="ADVENTURE"
+                            onclick="filterByCategory('ADVENTURE')">Adventure</button>
+                    </div>
+                </div>
+
+                <div style="display: none;"> <!-- Keeping budget filter hidden but functional if needed later -->
+                    <select id="filter-budget">
+                        <option value="ALL">Any Budget</option>
+                    </select>
+                </div>
             </div>
 
-            <div style="flex: 1; min-width: 210px;">
-                <label
-                    style="display: block; margin-bottom: 5px; font-size: 0.8rem; color: var(--text-muted);">Budget</label>
-                <select id="filter-budget">
-                    <option value="ALL">Any Budget</option>
-                    <option value="Under ₹200">Under ₹200</option>
-                    <option value="Under ₹500">Under ₹500</option>
-                    <option value="₹500+">₹500+</option>
-                </select>
+            <div id="explore-spots-grid" class="flex-column" style="display: flex; flex-direction: column; gap: 20px;">
+                <!-- Spots will be loaded here -->
+                <p class="text-center">Loading amazing spots...</p>
             </div>
-        </div>
+        </section>
 
-        <div id="explore-spots-grid" class="grid">
-            <!-- Spots will be loaded here -->
-            <p class="text-center">Loading amazing spots...</p>
-        </div>
-    </section>
+        <!-- RIGHT SIDE: LIVE MAP (60%) -->
+        <section id="explore-map" class="explore-map-container">
+            <!-- Map will be initialized here -->
+        </section>
+    </main>
 
     <!-- CORE SCRIPTS -->
     <script src="js/utils.js"></script>
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/maps.js"></script>
     <script src="js/spots.js"></script>
+
+    <!-- Google Maps API -->
+    <!-- Replace YOUR_GOOGLE_MAPS_API_KEY with your actual key -->
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCos3Z4n3jwzEUgUTCd1qXepgTC1jQdahE&libraries=places"></script>
 
     <script>
         // Update the select dropdown to match the URL category
         document.addEventListener('DOMContentLoaded', () => {
             const cat = getUrlParam('category') || 'ALL';
-            document.getElementById('filter-category').value = cat;
             loadExploreSpots();
+
+            // Set active class on filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.category === cat) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
         });
+
+        /**
+         * Filter spots by category and update UI
+         */
+        function filterByCategory(cat) {
+            // Update URL without reloading (cleaner feel)
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?category=' + cat;
+            window.history.pushState({ path: newUrl }, '', newUrl);
+
+            // Update UI buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.category === cat);
+            });
+
+            // Reload spots
+            loadExploreSpots();
+        }
     </script>
 </body>
 

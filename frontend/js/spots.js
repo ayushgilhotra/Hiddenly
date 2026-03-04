@@ -15,7 +15,7 @@ function createSpotCard(spot) {
     // We use a template string (backticks) to build the HTML
     // Note: We use 'spot?id=' instead of 'spot.html?id=' to avoid server redirect issues
     return `
-        <div class="card" onclick="navigateTo('spot?id=${spot.id}')">
+        <div class="card spot-card" id="spot-card-${spot.id}" data-id="${spot.id}" onclick="handleCardClick(${spot.id}, ${spot.latitude}, ${spot.longitude})">
             <img src="${spot.imageUrl}" alt="${spot.name}" class="card-img" onerror="if(!this.dataset.tried) { this.dataset.tried=true; this.src='${defaultImg}'; }">
             <div class="card-content">
                 <span class="badge badge-category">${spot.category}</span>
@@ -24,6 +24,7 @@ function createSpotCard(spot) {
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <span class="badge badge-budget">${spot.budgetRange}</span>
                     <span class="badge" style="background: rgba(212, 168, 83, 0.1); color: var(--primary); border: 1px solid rgba(212, 168, 83, 0.2);"><i class="fas fa-users"></i> ${spot.personsCount || 0}</span>
+                    ${spot.distance ? `<span class="badge" style="background: rgba(255,255,255,0.1); color: #fff;"><i class="fas fa-location-arrow"></i> ${spot.distance} km away</span>` : ''}
                 </div>
             </div>
         </div>
@@ -56,7 +57,14 @@ async function loadHomeSpots() {
     }
 }
 
-// --- FUNCTION: Load and filter spots (for Explore Page) ---
+// --- GLOBALS FOR EXPLORE PAGE ---
+let exploreMap;
+let activeMarkers = [];
+let activeInfoWindow = null;
+
+/**
+ * Loads and filters spots, then renders cards AND map markers
+ */
 async function loadExploreSpots() {
     try {
         const category = getUrlParam('category') || 'ALL';
@@ -68,15 +76,159 @@ async function loadExploreSpots() {
             spots = await api.getSpotsByCategory(category);
         }
 
+        // 1. Render Cards
         renderSpots(spots, 'explore-spots-grid');
 
-        // Update title if category is selected
+        // 2. Initialize or Update Map
+        if (!exploreMap && document.getElementById('explore-map')) {
+            exploreMap = initDarkMap('explore-map', { zoom: 5 });
+
+            // Add "Locate Me" button to the map
+            addLocateMeButton(exploreMap);
+        }
+
+        if (exploreMap) {
+            renderMapMarkers(spots);
+        }
+
+        // Update Title
         const title = document.getElementById('explore-title');
         if (title) title.innerText = category === 'ALL' ? 'Explore all Hidden Gems' : `Hidden ${category} Gems`;
 
     } catch (error) {
         console.error('Failed to load explore spots:', error);
     }
+}
+
+/**
+ * Renders markers on the explore map
+ */
+function renderMapMarkers(spots) {
+    // Clear old markers
+    activeMarkers.forEach(m => m.setMap(null));
+    activeMarkers = [];
+
+    const bounds = new google.maps.LatLngBounds();
+    let hasCoords = false;
+
+    spots.forEach(spot => {
+        if (spot.latitude && spot.longitude) {
+            const pos = { lat: spot.latitude, lng: spot.longitude };
+            const marker = createSpotMarker(exploreMap, pos, spot.name);
+
+            // Interaction: Marker Click
+            marker.addListener('click', () => {
+                showSpotInfo(spot, marker);
+                highlightCard(spot.id);
+            });
+
+            activeMarkers.push({ id: spot.id, marker });
+            bounds.extend(pos);
+            hasCoords = true;
+        }
+    });
+
+    // Fit map to markers if there are any
+    if (hasCoords) {
+        exploreMap.fitBounds(bounds);
+        if (exploreMap.getZoom() > 15) exploreMap.setZoom(15);
+    }
+}
+
+/**
+ * Highlights a card in the sidebar and scrolls to it
+ */
+function highlightCard(spotId) {
+    // Remove all highlights
+    document.querySelectorAll('.spot-card').forEach(c => c.style.borderColor = 'transparent');
+
+    const card = document.getElementById(`spot-card-${spotId}`);
+    if (card) {
+        card.style.borderColor = 'var(--primary)';
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+/**
+ * Handles clicking a card: Pans map and opens info window
+ */
+function handleCardClick(spotId, lat, lng) {
+    if (!lat || !lng) {
+        navigateTo(`spot?id=${spotId}`);
+        return;
+    }
+
+    if (exploreMap) {
+        const pos = { lat, lng };
+        exploreMap.panTo(pos);
+        exploreMap.setZoom(15);
+
+        // Find the marker for this spot and trigger click
+        const markerObj = activeMarkers.find(m => m.id === spotId);
+        if (markerObj) {
+            google.maps.event.trigger(markerObj.marker, 'click');
+        }
+    } else {
+        navigateTo(`spot?id=${spotId}`);
+    }
+}
+
+/**
+ * Shows the InfoWindow for a spot
+ */
+function showSpotInfo(spot, marker) {
+    if (activeInfoWindow) activeInfoWindow.close();
+
+    activeInfoWindow = createSpotInfoWindow(spot);
+    activeInfoWindow.open(exploreMap, marker);
+}
+
+/**
+ * Adds a "Locate Me" button to the map
+ */
+function addLocateMeButton(map) {
+    const controlDiv = document.createElement('div');
+    controlDiv.style.margin = '10px';
+
+    const controlUI = document.createElement('button');
+    controlUI.style.backgroundColor = 'var(--card-bg)';
+    controlUI.style.border = '1px solid var(--primary)';
+    controlUI.style.color = 'var(--primary)';
+    controlUI.style.padding = '8px 12px';
+    controlUI.style.borderRadius = '4px';
+    controlUI.innerHTML = '📍 My Location';
+    controlDiv.appendChild(controlUI);
+
+    controlUI.addEventListener('click', () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+
+                // Add a unique marker for user location
+                new google.maps.Marker({
+                    position: pos,
+                    map: map,
+                    icon: {
+                        path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                        scale: 5,
+                        fillColor: '#fff',
+                        fillOpacity: 1,
+                        strokeWeight: 2,
+                        strokeColor: '#000'
+                    },
+                    title: "You are here"
+                });
+
+                map.setCenter(pos);
+                map.setZoom(14);
+            });
+        }
+    });
+
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
 }
 
 // --- FUNCTION: Load details for a single spot ---
@@ -128,6 +280,32 @@ async function loadSpotDetails() {
         document.getElementById('spot-added-by').innerText = spot.addedBy.name;
         document.getElementById('spot-date').innerText = formatDate(spot.createdAt);
 
+        // --- MAP INTEGRATION ---
+        const mapSection = document.getElementById('spot-map-section');
+        const mapContainer = document.getElementById('detail-map');
+
+        if (spot.latitude && spot.longitude && mapContainer) {
+            mapSection.classList.remove('hidden');
+            const pos = { lat: spot.latitude, lng: spot.longitude };
+            const detailMap = initDarkMap('detail-map', {
+                center: pos,
+                zoom: 15
+            });
+            createSpotMarker(detailMap, pos, spot.name);
+
+            // Get Directions Button
+            const directionsBtn = document.getElementById('directions-btn');
+            if (directionsBtn) {
+                directionsBtn.onclick = () => {
+                    const url = `https://www.google.com/maps/dir/?api=1&destination=${spot.latitude},${spot.longitude}`;
+                    window.open(url, '_blank');
+                };
+            }
+        } else if (mapSection) {
+            mapSection.innerHTML = '<p style="color: var(--text-muted); padding: 20px; text-align: center;">📍 Location not added for this spot</p>';
+            mapSection.classList.remove('hidden');
+        }
+
         // Get the current user email from the token (if logged in) safely
         let currentUserEmail = null;
         try {
@@ -176,4 +354,69 @@ async function handleDeleteSpot() {
             showAlert(error.message, 'error');
         }
     }
+}
+
+/**
+ * Handles the "Explore Near Me" button click on Home page
+ */
+async function handleNearMe() {
+    const status = document.getElementById('location-status');
+    if (status) {
+        status.innerText = "Getting your location...";
+        status.classList.remove('hidden');
+    }
+
+    if (!navigator.geolocation) {
+        showAlert("Geolocation is not supported by your browser.", "error");
+        if (status) status.classList.add('hidden');
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+
+            try {
+                // Fetch all spots and filter by distance
+                const allSpots = await api.getSpots();
+
+                // Filter calculate distance and filter within 10km
+                const nearSpots = allSpots
+                    .map(spot => {
+                        if (spot.latitude && spot.longitude) {
+                            spot.distance = calculateDistance(userLat, userLng, spot.latitude, spot.longitude);
+                        }
+                        return spot;
+                    })
+                    .filter(spot => spot.distance && parseFloat(spot.distance) <= 10)
+                    .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+
+                if (status) status.classList.add('hidden');
+
+                // Render results in the grid
+                const grid = document.getElementById('home-spots-grid');
+                if (nearSpots.length === 0) {
+                    grid.innerHTML = '<p class="text-center" style="grid-column: 1/-1;">No hidden spots near you yet. Be the first to add one!</p>';
+                } else {
+                    renderSpots(nearSpots, 'home-spots-grid');
+                    showAlert(`Found ${nearSpots.length} spots near you!`);
+                }
+
+            } catch (error) {
+                console.error("Error fetching near spots:", error);
+                showAlert("Failed to load spots.", "error");
+                if (status) status.classList.add('hidden');
+            }
+        },
+        (error) => {
+            console.error("Geolocation error:", error);
+            if (error.code === 1) {
+                showAlert("Please allow location access to use this feature", "error");
+            } else {
+                showAlert("Could not get your location.", "error");
+            }
+            if (status) status.classList.add('hidden');
+        }
+    );
 }

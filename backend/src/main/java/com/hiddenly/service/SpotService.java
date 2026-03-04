@@ -101,6 +101,8 @@ public class SpotService {
         
         spot.setImageUrl(imageUrl);
         spot.setPersonsCount(request.getPersonsCount());
+        spot.setLatitude(request.getLatitude());
+        spot.setLongitude(request.getLongitude());
         spot.setAddedBy(user); // Set the relationship
 
         // 3. Save the spot to the database
@@ -129,6 +131,8 @@ public class SpotService {
         }
         
         spot.setPersonsCount(request.getPersonsCount());
+        spot.setLatitude(request.getLatitude());
+        spot.setLongitude(request.getLongitude());
 
         return spotRepository.save(spot);
     }

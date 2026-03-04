@@ -11,6 +11,8 @@ public class SpotRequest {
     private String budgetRange;
     private String imageUrl;
     private Integer personsCount;
+    private Double latitude;
+    private Double longitude;
 
     // --- GETTERS AND SETTERS ---
 
@@ -34,4 +36,10 @@ public class SpotRequest {
 
     public Integer getPersonsCount() { return personsCount; }
     public void setPersonsCount(Integer personsCount) { this.personsCount = personsCount; }
+
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
 }

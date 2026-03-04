@@ -41,6 +41,15 @@
             <button
                 onclick="window.location.href='explore?search=' + document.getElementById('home-search').value">Search</button>
         </div>
+
+        <div style="margin-top: 20px;">
+            <button id="near-me-btn"
+                style="background: transparent; border: 1px solid var(--primary); color: var(--primary);">
+                📍 Explore Near Me
+            </button>
+            <p id="location-status" style="font-size: 0.9rem; color: var(--text-muted); margin-top: 10px;"
+                class="hidden"></p>
+        </div>
     </header>
 
     <!-- CATEGORIES -->
@@ -82,11 +91,21 @@
     <script src="js/utils.js"></script>
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/maps.js"></script>
     <script src="js/spots.js"></script>
+
+    <!-- Google Maps API -->
+    <!-- Replace YOUR_GOOGLE_MAPS_API_KEY with your actual key -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCos3Z4n3jwzEUgUTCd1qXepgTC1jQdahE"></script>
 
     <script>
         // When the page finishes loading, get the latest spots
-        document.addEventListener('DOMContentLoaded', loadHomeSpots);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHomeSpots();
+
+            // Setup Near Me button
+            document.getElementById('near-me-btn').addEventListener('click', handleNearMe);
+        });
     </script>
 </body>
 
