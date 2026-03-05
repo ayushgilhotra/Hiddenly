@@ -89,6 +89,29 @@ async function loadExploreSpots() {
 
         if (exploreMap) {
             renderMapMarkers(spots);
+
+            // AUTO-GEOLOCATION: Try to show user on map
+            try {
+                const userPos = await getUserLocation();
+                showUserMarker(exploreMap, userPos);
+
+                // If no spots were found, center on user
+                if (spots.length === 0) {
+                    exploreMap.setCenter(userPos);
+                    exploreMap.setZoom(13);
+                } else {
+                    // Extend bounds to include user
+                    const bounds = new google.maps.LatLngBounds();
+                    spots.forEach(s => {
+                        if (s.latitude && s.longitude) bounds.extend({ lat: s.latitude, lng: s.longitude });
+                    });
+                    bounds.extend(userPos);
+                    exploreMap.fitBounds(bounds);
+                    if (exploreMap.getZoom() > 15) exploreMap.setZoom(15);
+                }
+            } catch (err) {
+                console.log("Auto-geolocation skipped:", err.message);
+            }
         }
 
         // Update Title
@@ -199,36 +222,18 @@ function addLocateMeButton(map) {
     controlUI.innerHTML = '📍 My Location';
     controlDiv.appendChild(controlUI);
 
-    controlUI.addEventListener('click', () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                const pos = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
 
-                // Add a unique marker for user location
-                new google.maps.Marker({
-                    position: pos,
-                    map: map,
-                    icon: {
-                        path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-                        scale: 5,
-                        fillColor: '#fff',
-                        fillOpacity: 1,
-                        strokeWeight: 2,
-                        strokeColor: '#000'
-                    },
-                    title: "You are here"
-                });
-
-                map.setCenter(pos);
-                map.setZoom(14);
-            });
+    controlUI.addEventListener('click', async () => {
+        try {
+            const pos = await getUserLocation();
+            showUserMarker(map, pos);
+            map.panTo(pos);
+            map.setZoom(15);
+        } catch (err) {
+            showAlert("Could not get your location. Please check browser permissions.", "error");
         }
     });
-
-    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
 }
 
 // --- FUNCTION: Load details for a single spot ---
@@ -372,51 +377,43 @@ async function handleNearMe() {
         return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-        async (position) => {
-            const userLat = position.coords.latitude;
-            const userLng = position.coords.longitude;
+    try {
+        const userPos = await getUserLocation();
+        const userLat = userPos.lat;
+        const userLng = userPos.lng;
 
-            try {
-                // Fetch all spots and filter by distance
-                const allSpots = await api.getSpots();
+        // Fetch all spots and filter by distance
+        const allSpots = await api.getSpots();
 
-                // Filter calculate distance and filter within 10km
-                const nearSpots = allSpots
-                    .map(spot => {
-                        if (spot.latitude && spot.longitude) {
-                            spot.distance = calculateDistance(userLat, userLng, spot.latitude, spot.longitude);
-                        }
-                        return spot;
-                    })
-                    .filter(spot => spot.distance && parseFloat(spot.distance) <= 10)
-                    .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
-
-                if (status) status.classList.add('hidden');
-
-                // Render results in the grid
-                const grid = document.getElementById('home-spots-grid');
-                if (nearSpots.length === 0) {
-                    grid.innerHTML = '<p class="text-center" style="grid-column: 1/-1;">No hidden spots near you yet. Be the first to add one!</p>';
-                } else {
-                    renderSpots(nearSpots, 'home-spots-grid');
-                    showAlert(`Found ${nearSpots.length} spots near you!`);
+        // Filter calculate distance and filter within 10km
+        const nearSpots = allSpots
+            .map(spot => {
+                if (spot.latitude && spot.longitude) {
+                    spot.distance = calculateDistance(userLat, userLng, spot.latitude, spot.longitude);
                 }
+                return spot;
+            })
+            .filter(spot => spot.distance && parseFloat(spot.distance) <= 10)
+            .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
 
-            } catch (error) {
-                console.error("Error fetching near spots:", error);
-                showAlert("Failed to load spots.", "error");
-                if (status) status.classList.add('hidden');
-            }
-        },
-        (error) => {
-            console.error("Geolocation error:", error);
-            if (error.code === 1) {
-                showAlert("Please allow location access to use this feature", "error");
-            } else {
-                showAlert("Could not get your location.", "error");
-            }
-            if (status) status.classList.add('hidden');
+        if (status) status.classList.add('hidden');
+
+        // Render results in the grid
+        const grid = document.getElementById('home-spots-grid');
+        if (nearSpots.length === 0) {
+            grid.innerHTML = '<p class="text-center" style="grid-column: 1/-1;">No hidden spots near you yet. Be the first to add one!</p>';
+        } else {
+            renderSpots(nearSpots, 'home-spots-grid');
+            showAlert(`Found ${nearSpots.length} spots near you!`);
         }
-    );
+
+    } catch (error) {
+        console.error("Geolocation error or API error:", error);
+        if (error.message === "Geolocation not supported" || error.code === 1) {
+            showAlert("Please allow location access to use this feature", "error");
+        } else {
+            showAlert("Could not get your location or load spots.", "error");
+        }
+        if (status) status.classList.add('hidden');
+    }
 }

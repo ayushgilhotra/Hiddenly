@@ -163,3 +163,40 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     const d = R * c; // Distance in km
     return d.toFixed(1);
 }
+
+/**
+ * Helper to get user's current position using browser API
+ */
+function getUserLocation() {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error("Geolocation not supported"));
+        } else {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                (err) => reject(err),
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        }
+    });
+}
+
+/**
+ * Shows a distinct marker for the user's location
+ */
+function showUserMarker(map, position) {
+    return new google.maps.Marker({
+        position,
+        map,
+        zIndex: 999,
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 7,
+            fillColor: '#4285F4', // Google Blue
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: '#ffffff'
+        },
+        title: "Your Location"
+    });
+}
