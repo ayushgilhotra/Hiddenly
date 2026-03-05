@@ -200,3 +200,39 @@ function showUserMarker(map, position) {
         title: "Your Location"
     });
 }
+
+/**
+ * Adds a "Locate Me" button to the map
+ * @param {google.maps.Map} map - The map instance
+ */
+function addLocateMeButton(map) {
+    const controlDiv = document.createElement('div');
+    controlDiv.style.margin = '10px';
+
+    const controlUI = document.createElement('button');
+    controlUI.style.backgroundColor = '#13110e'; // Match dark theme
+    controlUI.style.border = '1px solid #d4a853';
+    controlUI.style.color = '#d4a853';
+    controlUI.style.padding = '8px 12px';
+    controlUI.style.borderRadius = '4px';
+    controlUI.style.cursor = 'pointer';
+    controlUI.style.fontFamily = "'DM Sans', sans-serif";
+    controlUI.innerHTML = '📍 My Location';
+    controlDiv.appendChild(controlUI);
+
+    controlUI.addEventListener('click', async () => {
+        try {
+            const pos = await getUserLocation();
+            showUserMarker(map, pos);
+            map.panTo(pos);
+            map.setZoom(15);
+        } catch (err) {
+            console.error("Locate Me failed:", err);
+            if (typeof showAlert === 'function') {
+                showAlert("Could not get your location. Please check browser permissions.", "error");
+            }
+        }
+    });
+
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
+}

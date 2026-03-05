@@ -115,12 +115,26 @@
          * Initializes the map on the Add Spot page
          * Allows users to search for places and drop a pin
          */
-        function initAddSpotMap() {
-            // Initialize the map centered on India
+        async function initAddSpotMap() {
+            // Initialize the map centered on India (fallback)
             map = initDarkMap('add-spot-map', {
                 center: { lat: 20.5937, lng: 78.9629 },
                 zoom: 5
             });
+
+            // Add the "My Location" button
+            addLocateMeButton(map);
+
+            // Auto-geolocation for current location
+            try {
+                const userPos = await getUserLocation();
+                map.setCenter(userPos);
+                map.setZoom(15);
+                updateMarker(new google.maps.LatLng(userPos.lat, userPos.lng));
+                reverseGeocode(new google.maps.LatLng(userPos.lat, userPos.lng));
+            } catch (err) {
+                console.log("Auto-location skipped on Add Spot page:", err.message);
+            }
 
             geocoder = new google.maps.Geocoder();
 

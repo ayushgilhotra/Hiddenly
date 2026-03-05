@@ -206,36 +206,6 @@ function showSpotInfo(spot, marker) {
     activeInfoWindow.open(exploreMap, marker);
 }
 
-/**
- * Adds a "Locate Me" button to the map
- */
-function addLocateMeButton(map) {
-    const controlDiv = document.createElement('div');
-    controlDiv.style.margin = '10px';
-
-    const controlUI = document.createElement('button');
-    controlUI.style.backgroundColor = 'var(--card-bg)';
-    controlUI.style.border = '1px solid var(--primary)';
-    controlUI.style.color = 'var(--primary)';
-    controlUI.style.padding = '8px 12px';
-    controlUI.style.borderRadius = '4px';
-    controlUI.innerHTML = '📍 My Location';
-    controlDiv.appendChild(controlUI);
-
-    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
-
-    controlUI.addEventListener('click', async () => {
-        try {
-            const pos = await getUserLocation();
-            showUserMarker(map, pos);
-            map.panTo(pos);
-            map.setZoom(15);
-        } catch (err) {
-            showAlert("Could not get your location. Please check browser permissions.", "error");
-        }
-    });
-}
-
 // --- FUNCTION: Load details for a single spot ---
 async function loadSpotDetails() {
     const id = getUrlParam('id');
@@ -297,6 +267,19 @@ async function loadSpotDetails() {
                 zoom: 15
             });
             createSpotMarker(detailMap, pos, spot.name);
+
+            // Optional: Show user location on detail map too
+            getUserLocation().then(userPos => {
+                showUserMarker(detailMap, userPos);
+                // Adjust bounds to show both user and spot if reasonably close
+                const distance = calculateDistance(userPos.lat, userPos.lng, pos.lat, pos.lng);
+                if (distance < 50) { // Only fit bounds if within 50km
+                    const bounds = new google.maps.LatLngBounds();
+                    bounds.extend(pos);
+                    bounds.extend(userPos);
+                    detailMap.fitBounds(bounds);
+                }
+            }).catch(e => console.log("User location not available for detail map"));
 
             // Get Directions Button
             const directionsBtn = document.getElementById('directions-btn');
