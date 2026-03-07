@@ -17,12 +17,13 @@
 
     <!-- NAVBAR -->
     <nav>
-        <a href="index" class="brand">Hiddenly</a>
+        <a href="index.html" class="brand">Hiddenly</a>
         <ul class="nav-links">
-            <li><a href="explore" style="color: var(--primary);">Explore</a></li>
-            <li><a href="add-spot" id="add-spot-link" class="hidden">Add a Spot</a></li>
-            <li><a href="login" id="login-link">Login</a></li>
-            <li><a href="register" id="register-link" class="btn-auth">Register</a></li>
+            <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="explore.html" style="color: var(--primary);">Explore</a></li>
+            <li><a href="add-spot.html" id="add-spot-link" class="hidden">Add a Spot</a></li>
+            <li><a href="login.html" id="login-link">Login</a></li>
+            <li><a href="register.html" id="register-link" class="btn-auth">Register</a></li>
             <li id="user-name" class="hidden" style="color: var(--primary); font-weight: bold;"></li>
             <li><a href="#" id="logout-link" class="hidden" onclick="logout()">Logout</a></li>
         </ul>
@@ -99,12 +100,88 @@
             });
         });
 
+        // Reload spots
+        async function loadExploreSpots() {
+            try {
+                const category = getUrlParam('category') || 'ALL';
+                const nearMe = getUrlParam('nearMe') === 'true';
+                const radiusParam = getUrlParam('radius');
+                const radius = radiusParam ? parseFloat(radiusParam) : 10; // Default 10km
+
+                let spots;
+
+                if (category === 'ALL') {
+                    spots = await api.getSpots();
+                } else {
+                    spots = await api.getSpotsByCategory(category);
+                }
+
+                // If nearMe is active, filter by distance
+                if (nearMe) {
+                    try {
+                        const userPos = await getUserLocation();
+                        spots = spots
+                            .map(spot => {
+                                if (spot.latitude && spot.longitude) {
+                                    spot.distance = calculateDistance(userPos.lat, userPos.lng, spot.latitude, spot.longitude);
+                                }
+                                return spot;
+                            })
+                            .filter(spot => spot.distance && parseFloat(spot.distance) <= radius)
+                            .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+
+                        // Show a status alert
+                        if (spots.length > 0) {
+                            showAlert(`Found ${spots.length} spots within ${radius}km!`);
+                        } else {
+                            showAlert(`No spots found within ${radius}km of your location.`, "info");
+                        }
+                    } catch (err) {
+                        console.error("Near Me geolocation failed:", err);
+                        showAlert("Could not get your location for Near Me search.", "error");
+                    }
+                }
+
+                // 1. Render Cards
+                renderSpots(spots, 'explore-spots-grid');
+
+                // 2. Initialize or Update Map
+                if (!exploreMap && document.getElementById('explore-map')) {
+                    exploreMap = initDarkMap('explore-map', { zoom: 5 });
+                    addLocateMeButton(exploreMap);
+                }
+
+                if (exploreMap) {
+                    renderMapMarkers(spots);
+                }
+
+                // Update Title
+                const title = document.getElementById('explore-title');
+                if (title) {
+                    let titleText = category === 'ALL' ? 'Explore all Hidden Gems' : `Hidden ${category} Gems`;
+                    if (nearMe) titleText = `Spots within ${radius}km`;
+                    title.innerText = titleText;
+                }
+
+            } catch (error) {
+                console.error('Failed to load explore spots:', error);
+            }
+        }
+
+        // --- GLOBAL OVERRIDE ---
+        // We override the one in spots.js because we need parameters specific to this page
+        window.loadExploreSpots = loadExploreSpots;
+
         /**
          * Filter spots by category and update UI
          */
         function filterByCategory(cat) {
-            // Update URL without reloading (cleaner feel)
-            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?category=' + cat;
+            // Keep nearMe param if it exists
+            const nearMe = getUrlParam('nearMe');
+            let query = `?category=${cat}`;
+            if (nearMe) query += `&nearMe=${nearMe}`;
+
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + query;
             window.history.pushState({ path: newUrl }, '', newUrl);
 
             // Update UI buttons

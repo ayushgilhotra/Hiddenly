@@ -86,8 +86,12 @@ public class SpotService {
         
         // --- LOGIC: Handle Image URL ---
         String imageUrl = request.getImageUrl();
+        System.out.println("DEBUG: Saving spot with imageUrl: " + imageUrl);
+        
         // Check if the URL is TRULY blank/null
-        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            spot.setImageUrl(imageUrl.trim());
+        } else {
             // Assign a random default based on category
             String[] defaults = switch (spot.getCategory()) {
                 case "CAFE" -> CAFE_IMAGES;
@@ -96,10 +100,8 @@ public class SpotService {
                 case "ADVENTURE" -> ADVENTURE_IMAGES;
                 default -> OTHER_IMAGES;
             };
-            imageUrl = defaults[random.nextInt(defaults.length)];
+            spot.setImageUrl(defaults[random.nextInt(defaults.length)]);
         }
-        
-        spot.setImageUrl(imageUrl);
         spot.setPersonsCount(request.getPersonsCount());
         spot.setLatitude(request.getLatitude());
         spot.setLongitude(request.getLongitude());

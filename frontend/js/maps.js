@@ -100,7 +100,11 @@ function initDarkMap(containerId, options = {}) {
         zoomControl: true,
         mapTypeControl: false,
         streetViewControl: false,
-        fullscreenControl: false
+        fullscreenControl: true,
+        fullscreenControlOptions: {
+            position: google.maps.ControlPosition.BOTTOM_RIGHT
+        },
+        gestureHandling: 'cooperative' // Fixes "zoom trap" - allows page scrolling
     };
 
     const container = document.getElementById(containerId);
@@ -110,19 +114,40 @@ function initDarkMap(containerId, options = {}) {
 }
 
 /**
- * Creates a custom gold circle marker for a spot
+ * Creates a custom marker for a spot, color-coded by category
  * @param {google.maps.Map} map - The map instance
  * @param {object} position - {lat, lng} coordinates
  * @param {string} title - Marker tooltip title
+ * @param {string} category - The spot's category
  */
-function createSpotMarker(map, position, title) {
+function createSpotMarker(map, position, title, category = 'OTHER') {
+    const categoryColors = {
+        'CAFE': '#ff4757',      // Red
+        'NATURE': '#2ed573',    // Green
+        'FOOD': '#ffa502',      // Orange/Yellow
+        'ADVENTURE': '#a4b0be', // Grey (Updated below for purple)
+        'OTHER': '#1e90ff'      // Blue
+    };
+
+    // User specifically asked for: Cafe: Red, Nature: Green, others like purple, green etc.
+    // Refining colors:
+    const finalColors = {
+        'CAFE': '#ff4757',      // Red
+        'NATURE': '#2ed573',    // Green
+        'FOOD': '#eccc68',      // Yellow/Gold
+        'ADVENTURE': '#5352ed', // Purple/Blue
+        'OTHER': '#70a1ff'      // Light Blue
+    };
+
+    const color = finalColors[category] || finalColors['OTHER'];
+
     return new google.maps.Marker({
         position,
         map,
         title,
         icon: {
             path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#d4a853', // Gold color to match site
+            fillColor: color,
             fillOpacity: 1,
             strokeColor: '#ffffff',
             strokeWeight: 2,

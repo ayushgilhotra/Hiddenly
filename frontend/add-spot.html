@@ -15,9 +15,10 @@
 <body>
 
     <nav>
-        <a href="index" class="brand">Hiddenly</a>
+        <a href="index.html" class="brand">Hiddenly</a>
         <ul class="nav-links">
-            <li><a href="explore">Explore</a></li>
+            <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="explore.html">Explore</a></li>
             <li><a href="#" id="logout-link" onclick="logout()">Logout</a></li>
         </ul>
     </nav>
@@ -76,10 +77,24 @@
             </div>
 
             <div class="form-group">
-                <label for="imageUrl">Image URL (Optional)</label>
-                <input type="url" id="imageUrl" placeholder="Paste an image link from the web">
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Tip: Leave blank to use a
-                    default image.</p>
+                <label>Spot Image</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <button type="button" id="tab-url" class="filter-btn active" style="flex: 1;">Paste Link</button>
+                    <button type="button" id="tab-upload" class="filter-btn" style="flex: 1;">Upload File</button>
+                </div>
+
+                <div id="url-input-container">
+                    <input type="url" id="imageUrl" placeholder="Paste an image link from the web">
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Leave blank to use a
+                        default image.</p>
+                </div>
+
+                <div id="upload-input-container" class="hidden">
+                    <input type="file" id="imageFile" accept="image/*"
+                        style="padding: 10px; border: 1px dashed var(--primary);">
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Choose a photo from your
+                        gallery.</p>
+                </div>
             </div>
 
             <div class="form-group">
@@ -198,11 +213,51 @@
             });
         }
 
+        // Tab switching logic for image source
+        const tabUrl = document.getElementById('tab-url');
+        const tabUpload = document.getElementById('tab-upload');
+        const urlContainer = document.getElementById('url-input-container');
+        const uploadContainer = document.getElementById('upload-input-container');
+        let imageSource = 'url'; // default
+
+        tabUrl.onclick = () => {
+            tabUrl.classList.add('active');
+            tabUpload.classList.remove('active');
+            urlContainer.classList.remove('hidden');
+            uploadContainer.classList.add('hidden');
+            imageSource = 'url';
+        };
+
+        tabUpload.onclick = () => {
+            tabUpload.classList.add('active');
+            tabUrl.classList.remove('active');
+            uploadContainer.classList.remove('hidden');
+            urlContainer.classList.add('hidden');
+            imageSource = 'upload';
+        };
+
         document.getElementById('add-spot-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const lat = document.getElementById('latitude').value;
             const lng = document.getElementById('longitude').value;
+
+            let finalImageUrl = document.getElementById('imageUrl').value.trim();
+
+            // If user chose to upload a file
+            if (imageSource === 'upload') {
+                const fileInput = document.getElementById('imageFile');
+                if (fileInput.files.length > 0) {
+                    try {
+                        showAlert('Uploading image...', 'info');
+                        const result = await api.uploadImage(fileInput.files[0]);
+                        finalImageUrl = result.imageUrl;
+                    } catch (uploadErr) {
+                        showAlert('Image upload failed: ' + uploadErr.message, 'error');
+                        return;
+                    }
+                }
+            }
 
             const spotData = {
                 name: document.getElementById('name').value,
@@ -210,7 +265,7 @@
                 category: document.getElementById('category').value,
                 budgetRange: document.getElementById('budget').value,
                 personsCount: parseInt(document.getElementById('personsCount').value),
-                imageUrl: document.getElementById('imageUrl').value.trim(),
+                imageUrl: finalImageUrl,
                 description: document.getElementById('description').value,
                 latitude: lat ? parseFloat(lat) : null,
                 longitude: lng ? parseFloat(lng) : null

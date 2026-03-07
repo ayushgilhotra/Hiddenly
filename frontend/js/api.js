@@ -74,5 +74,31 @@ const api = {
     getSpotsByCategory: (cat) => apiCall(`/spots/category/${cat}`),
     addSpot: (spotData) => apiCall('/spots', 'POST', spotData, true),
     updateSpot: (id, spotData) => apiCall(`/spots/${id}`, 'PUT', spotData, true),
-    deleteSpot: (id) => apiCall(`/spots/${id}`, 'DELETE', null, true)
+    deleteSpot: (id) => apiCall(`/spots/${id}`, 'DELETE', null, true),
+
+    // --- REVIEWS API CALLS ---
+    addReview: (reviewData) => apiCall('/reviews', 'POST', reviewData, true),
+
+    // --- UPLOAD API CALLS ---
+    uploadImage: async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const token = localStorage.getItem('token');
+        const headers = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const response = await fetch(`${API_BASE_URL}/upload`, {
+            method: 'POST',
+            body: formData,
+            headers: headers
+        });
+
+        if (!response.ok) {
+            const err = await response.text();
+            throw new Error(err || 'Upload failed');
+        }
+
+        return await response.json();
+    }
 };

@@ -8,7 +8,7 @@ function isLoggedIn() {
 // Redirect if NOT logged in (for protected pages like add-spot.html)
 function checkAuth() {
     if (!isLoggedIn()) {
-        window.location.href = 'login';
+        window.location.href = 'login.html';
     }
 }
 
@@ -19,7 +19,7 @@ function logout() {
     localStorage.removeItem('userName');
 
     // Refresh to update UI (navbar, etc.)
-    window.location.href = 'index';
+    window.location.href = 'index.html';
 }
 
 // Update the Navbar based on login status

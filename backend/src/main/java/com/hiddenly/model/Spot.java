@@ -2,6 +2,8 @@ package com.hiddenly.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
 // This class represents the 'spots' table in our MySQL database.
 // Each spot is a hidden location shared by a user.
@@ -66,6 +68,10 @@ public class Spot {
     @Column(name = "longitude")
     private Double longitude;
 
+    // One spot can have many reviews.
+    @OneToMany(mappedBy = "spot", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
+
     // --- CONSTRUCTORS ---
 
     // Required by JPA
@@ -122,4 +128,7 @@ public class Spot {
 
     public Double getLongitude() { return longitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
+
+    public List<Review> getReviews() { return reviews; }
+    public void setReviews(List<Review> reviews) { this.reviews = reviews; }
 }

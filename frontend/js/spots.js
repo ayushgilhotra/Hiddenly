@@ -16,14 +16,15 @@ function createSpotCard(spot) {
     // Note: We use 'spot?id=' instead of 'spot.html?id=' to avoid server redirect issues
     return `
         <div class="card spot-card" id="spot-card-${spot.id}" data-id="${spot.id}" onclick="handleCardClick(${spot.id}, ${spot.latitude}, ${spot.longitude})">
-            <img src="${spot.imageUrl}" alt="${spot.name}" class="card-img" onerror="if(!this.dataset.tried) { this.dataset.tried=true; this.src='${defaultImg}'; }">
+            <img src="${spot.imageUrl || defaultImg}" alt="${spot.name}" class="card-img" onerror="if(!this.dataset.tried) { this.dataset.tried=true; this.src='${defaultImg}'; }">
             <div class="card-content">
                 <span class="badge badge-category">${spot.category}</span>
                 <h3 class="mt-20">${spot.name}</h3>
                 <p><i class="fas fa-map-marker-alt"></i> ${spot.location}</p>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                     <span class="badge badge-budget">${spot.budgetRange}</span>
                     <span class="badge" style="background: rgba(212, 168, 83, 0.1); color: var(--primary); border: 1px solid rgba(212, 168, 83, 0.2);"><i class="fas fa-users"></i> ${spot.personsCount || 0}</span>
+                    ${spot.averageRating > 0 ? `<span style="color: var(--primary); font-size: 0.85rem; font-weight: bold;"><i class="fas fa-star"></i> ${spot.averageRating.toFixed(1)}</span>` : ''}
                     ${spot.distance ? `<span class="badge" style="background: rgba(255,255,255,0.1); color: #fff;"><i class="fas fa-location-arrow"></i> ${spot.distance} km away</span>` : ''}
                 </div>
             </div>
@@ -88,21 +89,49 @@ async function loadExploreSpots() {
         }
 
         if (exploreMap) {
-            renderMapMarkers(spots);
+            // Apply Near Me / Radius filter if requested
+            const nearMe = getUrlParam('nearMe') === 'true';
+            const radiusParam = getUrlParam('radius');
+            const radius = radiusParam ? parseFloat(radiusParam) : 10; // Default 10km
 
-            // AUTO-GEOLOCATION: Try to show user on map
+            let filteredSpots = spots;
+
+            // AUTO-GEOLOCATION: Try to show user on map and filter
             try {
                 const userPos = await getUserLocation();
                 showUserMarker(exploreMap, userPos);
 
-                // If no spots were found, center on user
-                if (spots.length === 0) {
+                if (nearMe) {
+                    // Filter spots by distance
+                    filteredSpots = spots.filter(s => {
+                        if (!s.latitude || !s.longitude) return false;
+                        const dist = calculateDistance(userPos.lat, userPos.lng, s.latitude, s.longitude);
+                        s.distance = dist; // Store for display
+                        return dist <= radius;
+                    });
+
+                    // Sort by distance (closest first)
+                    filteredSpots.sort((a, b) => a.distance - b.distance);
+
+                    // Re-render markers and grid with filtered spots
+                    renderMapMarkers(filteredSpots);
+                    renderSpots(filteredSpots, 'explore-spots-grid');
+
+                    if (radiusParam) {
+                        const title = document.getElementById('explore-title');
+                        if (title) title.innerText = `Spots within ${radius}km of you`;
+                    }
+                } else {
+                    renderMapMarkers(spots);
+                }
+
+                // Adjust map view
+                if (filteredSpots.length === 0) {
                     exploreMap.setCenter(userPos);
                     exploreMap.setZoom(13);
                 } else {
-                    // Extend bounds to include user
                     const bounds = new google.maps.LatLngBounds();
-                    spots.forEach(s => {
+                    filteredSpots.forEach(s => {
                         if (s.latitude && s.longitude) bounds.extend({ lat: s.latitude, lng: s.longitude });
                     });
                     bounds.extend(userPos);
@@ -110,7 +139,8 @@ async function loadExploreSpots() {
                     if (exploreMap.getZoom() > 15) exploreMap.setZoom(15);
                 }
             } catch (err) {
-                console.log("Auto-geolocation skipped:", err.message);
+                console.log("Auto-geolocation skipped or failed:", err.message);
+                renderMapMarkers(spots); // Show all if geo fails
             }
         }
 
@@ -137,7 +167,7 @@ function renderMapMarkers(spots) {
     spots.forEach(spot => {
         if (spot.latitude && spot.longitude) {
             const pos = { lat: spot.latitude, lng: spot.longitude };
-            const marker = createSpotMarker(exploreMap, pos, spot.name);
+            const marker = createSpotMarker(exploreMap, pos, spot.name, spot.category);
 
             // Interaction: Marker Click
             marker.addListener('click', () => {
@@ -223,9 +253,8 @@ async function loadSpotDetails() {
         document.getElementById('spot-name').innerText = spot.name;
 
         const spotImg = document.getElementById('spot-image');
-        spotImg.src = spot.imageUrl;
 
-        // Category-aware fallback for detail page
+        // Category-aware fallback
         const fallbacks = {
             'CAFE': 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb',
             'NATURE': 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e',
@@ -234,6 +263,9 @@ async function loadSpotDetails() {
             'OTHER': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb'
         };
         const defaultImg = fallbacks[spot.category] || fallbacks['OTHER'];
+
+        spotImg.src = spot.imageUrl || defaultImg;
+
         spotImg.onerror = () => {
             if (!spotImg.dataset.tried) {
                 spotImg.dataset.tried = true;
@@ -255,6 +287,55 @@ async function loadSpotDetails() {
         document.getElementById('spot-added-by').innerText = spot.addedBy.name;
         document.getElementById('spot-date').innerText = formatDate(spot.createdAt);
 
+        // --- GOOGLE SEARCH FOR IMAGE (Optional Fix Suggestion) ---
+        // If the user's image is a Google Search thumbnail, it might be broken.
+        // We'll keep the current logic but we can later add better validation.
+
+        // --- REVIEWS LOGIC ---
+        renderAverageRating(spot.averageRating);
+        renderReviewsList(spot.reviews);
+
+        // Show/Hide Review Form based on Auth
+        const token = localStorage.getItem('token');
+        if (token) {
+            document.getElementById('add-review-container').classList.remove('hidden');
+            document.getElementById('login-to-review').classList.add('hidden');
+
+            // Setup Review Form submission
+            const reviewForm = document.getElementById('review-form');
+            if (reviewForm) {
+                reviewForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const rating = reviewForm.querySelector('input[name="rating"]:checked')?.value;
+                    const comment = document.getElementById('review-comment').value;
+
+                    if (!rating) {
+                        showAlert('Please select a rating', 'error');
+                        return;
+                    }
+
+                    try {
+                        const reviewData = {
+                            spotId: spot.id,
+                            rating: parseInt(rating),
+                            comment: comment
+                        };
+                        await api.addReview(reviewData);
+                        showAlert('Review added successfully!');
+                        // Reload spot details to show new review and updated average
+                        loadSpotDetails();
+                        // Reset form
+                        reviewForm.reset();
+                    } catch (err) {
+                        showAlert(err.message, 'error');
+                    }
+                };
+            }
+        } else {
+            document.getElementById('add-review-container').classList.add('hidden');
+            document.getElementById('login-to-review').classList.remove('hidden');
+        }
+
         // --- MAP INTEGRATION ---
         const mapSection = document.getElementById('spot-map-section');
         const mapContainer = document.getElementById('detail-map');
@@ -266,7 +347,7 @@ async function loadSpotDetails() {
                 center: pos,
                 zoom: 15
             });
-            createSpotMarker(detailMap, pos, spot.name);
+            createSpotMarker(detailMap, pos, spot.name, spot.category);
 
             // Optional: Show user location on detail map too
             getUserLocation().then(userPos => {
@@ -346,57 +427,84 @@ async function handleDeleteSpot() {
 
 /**
  * Handles the "Explore Near Me" button click on Home page
+ * Prompts for radius and redirects to Explore page
  */
 async function handleNearMe() {
-    const status = document.getElementById('location-status');
-    if (status) {
-        status.innerText = "Getting your location...";
-        status.classList.remove('hidden');
-    }
+    const radius = prompt("Enter search radius in km (e.g. 5, 10, 0.5):", "10");
+    if (radius === null) return; // User cancelled
 
-    if (!navigator.geolocation) {
-        showAlert("Geolocation is not supported by your browser.", "error");
-        if (status) status.classList.add('hidden');
+    const r = parseFloat(radius);
+    if (isNaN(r) || r <= 0) {
+        showAlert("Please enter a valid positive number for radius.", "error");
         return;
     }
 
-    try {
-        const userPos = await getUserLocation();
-        const userLat = userPos.lat;
-        const userLng = userPos.lng;
+    navigateTo(`explore?nearMe=true&radius=${r}`);
+}
 
-        // Fetch all spots and filter by distance
-        const allSpots = await api.getSpots();
+/**
+ * Renders the average rating stars
+ */
+function renderAverageRating(rating) {
+    const container = document.getElementById('avg-rating');
+    if (!container) return;
 
-        // Filter calculate distance and filter within 10km
-        const nearSpots = allSpots
-            .map(spot => {
-                if (spot.latitude && spot.longitude) {
-                    spot.distance = calculateDistance(userLat, userLng, spot.latitude, spot.longitude);
-                }
-                return spot;
-            })
-            .filter(spot => spot.distance && parseFloat(spot.distance) <= 10)
-            .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
-
-        if (status) status.classList.add('hidden');
-
-        // Render results in the grid
-        const grid = document.getElementById('home-spots-grid');
-        if (nearSpots.length === 0) {
-            grid.innerHTML = '<p class="text-center" style="grid-column: 1/-1;">No hidden spots near you yet. Be the first to add one!</p>';
-        } else {
-            renderSpots(nearSpots, 'home-spots-grid');
-            showAlert(`Found ${nearSpots.length} spots near you!`);
-        }
-
-    } catch (error) {
-        console.error("Geolocation error or API error:", error);
-        if (error.message === "Geolocation not supported" || error.code === 1) {
-            showAlert("Please allow location access to use this feature", "error");
-        } else {
-            showAlert("Could not get your location or load spots.", "error");
-        }
-        if (status) status.classList.add('hidden');
+    if (!rating || rating === 0) {
+        container.innerHTML = 'No ratings yet';
+        return;
     }
+
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    let html = `<span>${rating.toFixed(1)} </span>`;
+    for (let i = 0; i < 5; i++) {
+        if (i < fullStars) {
+            html += '<i class="fas fa-star"></i>';
+        } else if (i === fullStars && hasHalfStar) {
+            html += '<i class="fas fa-star-half-alt"></i>';
+        } else {
+            html += '<i class="far fa-star"></i>';
+        }
+    }
+    container.innerHTML = html;
+}
+
+/**
+ * Renders the list of reviews
+ */
+function renderReviewsList(reviews) {
+    const container = document.getElementById('reviews-list');
+    if (!container) return;
+
+    if (!reviews || reviews.length === 0) {
+        container.innerHTML = '<p class="text-center" style="color: var(--text-muted);">No reviews yet. Be the first to share your experience!</p>';
+        return;
+    }
+
+    container.innerHTML = [...reviews].reverse().map(review => `
+        <div class="review-card">
+            <div class="review-header">
+                <div>
+                    <span class="review-user">${review.user.name}</span>
+                    <div class="review-stars">
+                        ${generateStarsHtml(review.rating)}
+                    </div>
+                </div>
+                <span class="review-date">${formatDate(review.createdAt)}</span>
+            </div>
+            ${review.comment ? `<p class="review-comment">"${review.comment}"</p>` : ''}
+        </div>
+    `).join('');
+}
+
+/**
+ * Helper to generate stars for a given rating
+ */
+function generateStarsHtml(rating) {
+    let html = '';
+    for (let i = 1; i <= 5; i++) {
+        html += i <= rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+    }
+    return html;
 }

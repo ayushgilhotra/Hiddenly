@@ -2,7 +2,12 @@
 
 // Show an alert message to the user
 function showAlert(message, type = 'success') {
-    alert(message); // Simple alert for now (Beginner Friendly)
+    if (type === 'info') {
+        console.log("INFO:", message);
+        // We could add a small toast here later
+    } else {
+        alert(message);
+    }
 }
 
 // Redirect the user to a new page

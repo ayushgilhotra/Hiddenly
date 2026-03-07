@@ -16,12 +16,13 @@
 <body>
 
     <nav>
-        <a href="index" class="brand">Hiddenly</a>
+        <a href="index.html" class="brand">Hiddenly</a>
         <ul class="nav-links">
-            <li><a href="explore">Explore</a></li>
-            <li><a href="add-spot" id="add-spot-link" class="hidden">Add a Spot</a></li>
-            <li><a href="login" id="login-link">Login</a></li>
-            <li><a href="register" id="register-link" class="btn-auth">Register</a></li>
+            <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="explore.html">Explore</a></li>
+            <li><a href="add-spot.html" id="add-spot-link" class="hidden">Add a Spot</a></li>
+            <li><a href="login.html" id="login-link">Login</a></li>
+            <li><a href="register.html" id="register-link" class="btn-auth">Register</a></li>
             <li id="user-name" class="hidden" style="color: var(--primary); font-weight: bold;"></li>
             <li><a href="#" id="logout-link" class="hidden" onclick="logout()">Logout</a></li>
         </ul>
@@ -88,6 +89,59 @@
                         style="width: 100%; margin-top: 15px; background: none; border: 1px solid var(--primary); color: var(--primary);">
                         🗺️ Get Directions
                     </button>
+                </div>
+
+                <!-- REVIEWS SECTION -->
+                <div id="reviews-section"
+                    style="margin-top: 40px; border-top: 1px solid rgba(212, 168, 83, 0.1); padding-top: 30px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                        <h3>Community Reviews</h3>
+                        <div id="avg-rating" style="color: var(--primary); font-weight: bold; font-size: 1.2rem;">
+                            <!-- Stars will be injected here -->
+                        </div>
+                    </div>
+
+                    <!-- Add Review Form (Hidden if not logged in) -->
+                    <div id="add-review-container" class="hidden"
+                        style="background: rgba(212, 168, 83, 0.05); padding: 25px; border-radius: var(--border-radius); border: 1px solid rgba(212, 168, 83, 0.1); margin-bottom: 30px;">
+                        <h4 style="margin-bottom: 15px;">Leave a Review</h4>
+                        <form id="review-form">
+                            <div class="form-group">
+                                <label>Your Rating</label>
+                                <div class="star-rating">
+                                    <input type="radio" name="rating" id="star5" value="5"><label for="star5"
+                                        title="5 stars"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" id="star4" value="4"><label for="star4"
+                                        title="4 stars"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" id="star3" value="3"><label for="star3"
+                                        title="3 stars"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" id="star2" value="2"><label for="star2"
+                                        title="2 stars"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" id="star1" value="1" required><label for="star1"
+                                        title="1 star"><i class="fas fa-star"></i></label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="review-comment">Details (Optional)</label>
+                                <textarea id="review-comment" rows="3"
+                                    placeholder="What did you think of this hidden gem?"></textarea>
+                            </div>
+                            <button type="submit" style="width: 100%;">Submit Review</button>
+                        </form>
+                    </div>
+
+                    <div id="login-to-review" class="text-center" style="padding: 20px; color: var(--text-muted);">
+                        <p><a href="login.html" style="color: var(--primary); text-decoration: underline;">Login</a> to
+                            leave
+                            a review and help the community!</p>
+                    </div>
+
+                    <!-- List of Reviews -->
+                    <div id="reviews-list">
+                        <p class="text-center" style="color: var(--text-muted);">No reviews yet. Be the first to share
+                            your experience!</p>
+                    </div>
                 </div>
             </div>
         </div>
