@@ -1,5 +1,8 @@
 // This file connects our frontend to our Spring Boot backend
-const API_BASE_URL = 'http://localhost:8080/api';
+// Automatically use localhost for development, and the live Render URL for production.
+const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const PRODUCTION_API_URL = 'https://hiddenly.onrender.com/api'; // Live Render URL
+const API_BASE_URL = IS_LOCAL ? 'http://localhost:8080/api' : PRODUCTION_API_URL;
 
 // Helper function to handle fetch and errors in one place
 async function apiCall(endpoint, method = 'GET', body = null, authenticated = false) {
