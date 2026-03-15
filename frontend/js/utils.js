@@ -12,7 +12,11 @@ function showAlert(message, type = 'success') {
 
 // Redirect the user to a new page
 function navigateTo(page) {
-    window.location.href = page;
+    if (!page.includes('.') && !page.includes('?')) {
+        window.location.href = page + '.html';
+    } else {
+        window.location.href = page;
+    }
 }
 
 // Get parameters from the URL (e.g., getting ?id=123)
