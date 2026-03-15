@@ -49,8 +49,17 @@ async function apiCall(endpoint, method = 'GET', body = null, authenticated = fa
                 }
             }
 
-            const errorData = await response.text();
-            throw new Error(errorData || 'API request failed');
+            const errorText = await response.text();
+            let errorMessage = errorText;
+            try {
+                // Try to parse the error as JSON just in case the backend sent an object
+                const errorJson = JSON.parse(errorText);
+                errorMessage = errorJson.message || errorText;
+            } catch (e) {
+                // If it fails to parse, it's just a raw text string (like "Email already registered!")
+            }
+            
+            throw new Error(errorMessage || 'API request failed');
         }
 
         // 7. Parse JSON if there is content
