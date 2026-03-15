@@ -304,6 +304,19 @@ async function loadSpotDetails() {
             // Setup Review Form submission
             const reviewForm = document.getElementById('review-form');
             if (reviewForm) {
+                // BUG FIX: Mobile browsers sometimes don't trigger radio inputs when clicking labels in flex-reverse.
+                // Explicitly bind the click events to the labels to check the corresponding input.
+                const starLabels = reviewForm.querySelectorAll('.star-rating label');
+                starLabels.forEach(label => {
+                    label.addEventListener('click', () => {
+                        const inputId = label.getAttribute('for');
+                        if (inputId) {
+                            const radioBtn = document.getElementById(inputId);
+                            if (radioBtn) radioBtn.checked = true;
+                        }
+                    });
+                });
+
                 reviewForm.onsubmit = async (e) => {
                     e.preventDefault();
                     const rating = reviewForm.querySelector('input[name="rating"]:checked')?.value;

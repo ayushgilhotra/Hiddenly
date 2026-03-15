@@ -547,4 +547,26 @@ button:hover {
     .legend-grid {
         grid-template-columns: 1fr;
     }
+    
+    /* Wrap Category Buttons */
+    .mt-20 {
+        flex-wrap: wrap;
+    }
+
+    /* Wrap Input fields in Add Spot */
+    input, select, textarea {
+        box-sizing: border-box; 
+        max-width: 100%;
+    }
+
+    /* Ensure flex form rows wrap or stack natively */
+    form > div {
+        flex-wrap: wrap !important;
+    }
+
+    /* Stop user name overflowing the nav */
+    #user-name {
+        text-align: center;
+        width: 100%;
+    }
 }
