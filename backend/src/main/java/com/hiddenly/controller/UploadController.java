@@ -37,8 +37,12 @@ public class UploadController {
             // Save file
             Files.copy(file.getInputStream(), path);
 
-            // Return relative URL for frontend
-            String fileUrl = "http://localhost:8080/uploads/" + filename;
+            // Dynamically get the current server URL (localhost for local, render for production)
+            String fileUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/uploads/")
+                    .path(filename)
+                    .toUriString();
+
             return ResponseEntity.ok().body("{\"imageUrl\": \"" + fileUrl + "\"}");
 
         } catch (IOException e) {
