@@ -484,3 +484,67 @@ button:hover {
 .star-rating input:checked~label {
     color: var(--primary);
 }
+
+/* ===== MOBILE RESPONSIVE TWEAKS ===== */
+@media (max-width: 768px) {
+    /* Navbar stack */
+    nav {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px 5%;
+    }
+    
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+        padding: 0;
+        margin: 0;
+    }
+    
+    /* Hero Section */
+    .hero {
+        padding: 40px 5%;
+        min-height: 50vh;
+        height: auto;
+    }
+    
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+    
+    .hero p {
+        font-size: 1rem;
+    }
+    
+    .search-container {
+        flex-direction: column;
+    }
+    
+    /* Forms */
+    .auth-form {
+        margin: 40px 15px;
+        padding: 25px;
+    }
+    
+    /* Ensure grid is full width on mobile */
+    .grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Reduce Explore split view heights */
+    .explore-sidebar,
+    .explore-map-container {
+        height: 400px;
+    }
+    
+    /* Reduce map container height slightly */
+    .map-container {
+        height: 250px;
+    }
+    
+    /* Legend grid stack */
+    .legend-grid {
+        grid-template-columns: 1fr;
+    }
+}
