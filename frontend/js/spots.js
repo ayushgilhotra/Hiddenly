@@ -1,8 +1,7 @@
 // This file contains logic for showing spots on the UI (cards, lists, etc.)
 
-// --- FUNCTION: Create the HTML for a single spot card ---
-function createSpotCard(spot) {
-    // Helper to get a stable fallback based on category
+// --- HELPER: Get proper image URL logic ---
+function getProperImageUrl(url, category) {
     const fallbacks = {
         'CAFE': 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb',
         'NATURE': 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e',
@@ -10,13 +9,36 @@ function createSpotCard(spot) {
         'ADVENTURE': 'https://images.unsplash.com/photo-1533240332313-0bc499f50e10',
         'OTHER': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb'
     };
-    const defaultImg = fallbacks[spot.category] || fallbacks['OTHER'];
+    const defaultImg = fallbacks[category] || fallbacks['OTHER'];
+    if (!url) return defaultImg;
 
-    // IMAGE FIX: If the URL is relative or from localhost, ensure it works on the current host (phone IP)
-    let finalSrc = spot.imageUrl || defaultImg;
-    if (finalSrc.includes('localhost:8080')) {
-        finalSrc = finalSrc.replace('localhost:8080', window.location.hostname + ':8080');
+    let finalSrc = url;
+
+    try {
+        // 1. If it's a relative path (doesn't start with http or //)
+        if (!finalSrc.startsWith('http') && !finalSrc.startsWith('//')) {
+            const base = API_BASE_URL.replace('/api', ''); // Get http://host:port
+            finalSrc = base + (finalSrc.startsWith('/') ? '' : '/') + finalSrc;
+        }
+
+        // 2. If it points to localhost:8080 but we are on a different host (e.g. mobile)
+        if (finalSrc.includes('localhost:8080') && typeof API_BASE_URL !== 'undefined') {
+            const backendHost = new URL(API_BASE_URL).host; 
+            finalSrc = finalSrc.replace('localhost:8080', backendHost);
+        }
+    } catch (e) {
+        console.warn("Could not fix image URL:", e);
     }
+    
+    return finalSrc;
+}
+
+// --- FUNCTION: Create the HTML for a single spot card ---
+function createSpotCard(spot) {
+    const finalSrc = getProperImageUrl(spot.imageUrl, spot.category);
+    const defaultImg = getProperImageUrl('', spot.category); // Get default fallback
+
+
 
     return `
         <div class="card spot-card animate-up" id="spot-card-${spot.id}" data-id="${spot.id}" onclick="handleCardClick(${spot.id}, ${spot.latitude}, ${spot.longitude})">
@@ -259,17 +281,10 @@ async function loadSpotDetails() {
 
         const spotImg = document.getElementById('spot-image');
 
-        // Category-aware fallback
-        const fallbacks = {
-            'CAFE': 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb',
-            'NATURE': 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e',
-            'FOOD': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836',
-            'ADVENTURE': 'https://images.unsplash.com/photo-1533240332313-0bc499f50e10',
-            'OTHER': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb'
-        };
-        const defaultImg = fallbacks[spot.category] || fallbacks['OTHER'];
+        const finalSrc = getProperImageUrl(spot.imageUrl, spot.category);
+        const defaultImg = getProperImageUrl('', spot.category); // Get default fallback
 
-        spotImg.src = spot.imageUrl || defaultImg;
+        spotImg.src = finalSrc;
 
         spotImg.onerror = () => {
             if (!spotImg.dataset.tried) {
