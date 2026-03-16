@@ -14,14 +14,46 @@
 
 <body>
 
-    <nav>
-        <a href="index.html" class="brand">Hiddenly</a>
-        <ul class="nav-links">
+    <!-- SIDEBAR MENU -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <span class="brand"><img src="assets/images/logo.png" alt="Logo"> Hiddenly</span>
+            <div class="hamburger" onclick="toggleSidebar(false)">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <ul class="sidebar-links">
             <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="explore.html"><i class="fas fa-search"></i> Explore</a></li>
+            <li><a href="explore.html?view=map"><i class="fas fa-map-marked-alt"></i> Full Map</a></li>
+            <li><a href="add-spot.html" class="active"><i class="fas fa-plus-circle"></i> Add a Spot</a></li>
+            <li><hr style="border-color: rgba(212, 168, 83, 0.1); margin: 10px 0;"></li>
+            <li><a href="help.html"><i class="fas fa-question-circle"></i> Help Guide</a></li>
+            <li><a href="contact.html"><i class="fas fa-envelope"></i> Contact Us</a></li>
+            <li id="side-logout" class="hidden"><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </aside>
+
+    <!-- NAVBAR -->
+    <nav>
+        <div class="hamburger" onclick="toggleSidebar(true)">
+            <span></span><span></span><span></span>
+        </div>
+        <a href="index.html" class="brand"><img src="assets/images/logo.png" alt="Logo"> Hiddenly</a>
+        <ul class="nav-links">
             <li><a href="explore.html">Explore</a></li>
-            <li><a href="#" id="logout-link" onclick="logout()">Logout</a></li>
+            <li id="nav-auth-links">
+                <a href="login.html" id="login-link">Login</a>
+                <a href="register.html" id="register-link" class="btn-auth">Register</a>
+            </li>
+            <li id="nav-user-info" class="hidden">
+                 <span id="nav-user-name" style="color: var(--primary); font-size: 0.9rem; margin-right: 15px;"></span>
+                 <a href="add-spot.html" class="btn-auth">Add Spot</a>
+            </li>
         </ul>
     </nav>
+
+
 
     <div class="container" style="max-width: 600px;">
         <h1 class="text-center">Share a Hidden Gem</h1>
@@ -132,10 +164,12 @@
          */
         async function initAddSpotMap() {
             // Initialize the map centered on India (fallback)
-            map = initDarkMap('add-spot-map', {
+            map = await initDarkMap('add-spot-map', {
                 center: { lat: 20.5937, lng: 78.9629 },
                 zoom: 5
             });
+
+            if (!map) return; // Promise resolved but map creation failed or container missing
 
             // Add the "My Location" button
             addLocateMeButton(map);
@@ -239,44 +273,52 @@
         document.getElementById('add-spot-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+
             const lat = document.getElementById('latitude').value;
             const lng = document.getElementById('longitude').value;
 
             let finalImageUrl = document.getElementById('imageUrl').value.trim();
 
-            // If user chose to upload a file
-            if (imageSource === 'upload') {
-                const fileInput = document.getElementById('imageFile');
-                if (fileInput.files.length > 0) {
-                    try {
-                        showAlert('Uploading image...', 'info');
-                        const result = await api.uploadImage(fileInput.files[0]);
-                        finalImageUrl = result.imageUrl;
-                    } catch (uploadErr) {
-                        showAlert('Image upload failed: ' + uploadErr.message, 'error');
-                        return;
+            try {
+                // Show Global Loader and Disable Button
+                toggleLoader(true, 'Saving your secret... Please wait');
+                submitBtn.disabled = true;
+
+                // If user chose to upload a file
+                if (imageSource === 'upload') {
+                    const fileInput = document.getElementById('imageFile');
+                    if (fileInput.files.length > 0) {
+                        try {
+                            const result = await api.uploadImage(fileInput.files[0]);
+                            finalImageUrl = result.imageUrl;
+                        } catch (uploadErr) {
+                            throw new Error('Image upload failed: ' + uploadErr.message);
+                        }
                     }
                 }
-            }
 
-            const spotData = {
-                name: document.getElementById('name').value,
-                location: document.getElementById('location').value,
-                category: document.getElementById('category').value,
-                budgetRange: document.getElementById('budget').value,
-                personsCount: parseInt(document.getElementById('personsCount').value),
-                imageUrl: finalImageUrl,
-                description: document.getElementById('description').value,
-                latitude: lat ? parseFloat(lat) : null,
-                longitude: lng ? parseFloat(lng) : null
-            };
+                const spotData = {
+                    name: document.getElementById('name').value,
+                    location: document.getElementById('location').value,
+                    category: document.getElementById('category').value,
+                    budgetRange: document.getElementById('budget').value,
+                    personsCount: parseInt(document.getElementById('personsCount').value),
+                    imageUrl: finalImageUrl,
+                    description: document.getElementById('description').value,
+                    latitude: lat ? parseFloat(lat) : null,
+                    longitude: lng ? parseFloat(lng) : null
+                };
 
-            try {
                 await api.addSpot(spotData);
                 showAlert('Spot added successfully!');
                 navigateTo('explore');
             } catch (error) {
                 showAlert(error.message, 'error');
+            } finally {
+                // Hide Loader and Enable Button
+                toggleLoader(false);
+                submitBtn.disabled = false;
             }
         });
     </script>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Guide | Hiddenly</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- SIDEBAR MENU -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <span class="brand"><img src="assets/images/logo.png" alt="Logo"> Hiddenly</span>
+            <div class="hamburger" onclick="toggleSidebar(false)">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <ul class="sidebar-links">
+            <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="explore.html"><i class="fas fa-search"></i> Explore</a></li>
+            <li><a href="explore.html?view=map"><i class="fas fa-map-marked-alt"></i> Full Map</a></li>
+            <li><a href="add-spot.html" id="side-add-spot" class="hidden"><i class="fas fa-plus-circle"></i> Add a Spot</a></li>
+            <li><hr style="border-color: rgba(212, 168, 83, 0.1); margin: 10px 0;"></li>
+            <li><a href="help.html" class="active"><i class="fas fa-question-circle"></i> Help Guide</a></li>
+            <li><a href="contact.html"><i class="fas fa-envelope"></i> Contact Us</a></li>
+            <li id="side-logout" class="hidden"><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </aside>
+
+    <nav>
+        <div class="hamburger" onclick="toggleSidebar(true)">
+            <span></span><span></span><span></span>
+        </div>
+        <a href="index.html" class="brand"><img src="assets/images/logo.png" alt="Logo"> Hiddenly</a>
+        <ul class="nav-links">
+            <li><a href="explore.html">Explore</a></li>
+            <li id="nav-auth-links">
+                <a href="login.html" id="login-link">Login</a>
+                <a href="register.html" id="register-link" class="btn-auth">Register</a>
+            </li>
+            <li id="nav-user-info" class="hidden">
+                 <span id="nav-user-name" style="color: var(--primary); font-size: 0.9rem; margin-right: 15px;"></span>
+                 <a href="add-spot.html" class="btn-auth">Add Spot</a>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="container" style="max-width: 800px; padding-top: 50px;">
+        <h1 class="text-center" style="margin-bottom: 40px;">How to Use Hiddenly</h1>
+        
+        <div style="background: var(--card-bg); padding: 30px; border-radius: var(--border-radius); border: 1px solid rgba(212, 168, 83, 0.1); margin-bottom: 30px;">
+            <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fas fa-search"></i> 1. Discovering Spots</h3>
+            <p style="color: var(--text-muted); line-height: 1.6;">Browse the <b>Explore</b> page to see a list of hidden gems shared by others. You can filter by category like Cafes, Nature, or Adventure to find exactly what you're looking for.</p>
+        </div>
+
+        <div style="background: var(--card-bg); padding: 30px; border-radius: var(--border-radius); border: 1px solid rgba(212, 168, 83, 0.1); margin-bottom: 30px;">
+            <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fas fa-map-marker-alt"></i> 2. Finding the Location</h3>
+            <p style="color: var(--text-muted); line-height: 1.6;">Each spot has a secret location. Since these are "hidden" gems, the exact building might be hard to find! Click on any spot card in the Explore list, and we'll show you its exact location on the map at the bottom of the page.</p>
+        </div>
+
+        <div style="background: var(--card-bg); padding: 30px; border-radius: var(--border-radius); border: 1px solid rgba(212, 168, 83, 0.1); margin-bottom: 30px;">
+            <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fas fa-plus-circle"></i> 3. Sharing Your Own Gems</h3>
+            <p style="color: var(--text-muted); line-height: 1.6;">Found a place nobody knows about? <b>Login</b> or <b>Register</b> to unlock the "Add Spot" feature. You can upload a photo, describe the vibe, and drop a pin on the map to help other explorers find it!</p>
+        </div>
+
+        <div class="text-center" style="margin-top: 50px;">
+            <button onclick="navigateTo('explore')" class="btn-auth" style="padding: 12px 30px; font-size: 1rem;">Start Exploring Now</button>
+        </div>
+    </main>
+
+    <footer class="text-center" style="padding: 40px; color: var(--text-muted); border-top: 1px solid rgba(212, 168, 83, 0.1); margin-top: 80px;">
+        <p>&copy; 2025 Hiddenly. Built for explorers.</p>
+    </footer>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

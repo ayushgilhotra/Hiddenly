@@ -12,11 +12,15 @@ function createSpotCard(spot) {
     };
     const defaultImg = fallbacks[spot.category] || fallbacks['OTHER'];
 
-    // We use a template string (backticks) to build the HTML
-    // Note: We use 'spot?id=' instead of 'spot.html?id=' to avoid server redirect issues
+    // IMAGE FIX: If the URL is relative or from localhost, ensure it works on the current host (phone IP)
+    let finalSrc = spot.imageUrl || defaultImg;
+    if (finalSrc.includes('localhost:8080')) {
+        finalSrc = finalSrc.replace('localhost:8080', window.location.hostname + ':8080');
+    }
+
     return `
-        <div class="card spot-card" id="spot-card-${spot.id}" data-id="${spot.id}" onclick="handleCardClick(${spot.id}, ${spot.latitude}, ${spot.longitude})">
-            <img src="${spot.imageUrl || defaultImg}" alt="${spot.name}" class="card-img" onerror="if(!this.dataset.tried) { this.dataset.tried=true; this.src='${defaultImg}'; }">
+        <div class="card spot-card animate-up" id="spot-card-${spot.id}" data-id="${spot.id}" onclick="handleCardClick(${spot.id}, ${spot.latitude}, ${spot.longitude})">
+            <img src="${finalSrc}" alt="${spot.name}" class="card-img" onerror="this.src='${defaultImg}'">
             <div class="card-content">
                 <span class="badge badge-category">${spot.category}</span>
                 <h3 class="mt-20">${spot.name}</h3>
@@ -67,89 +71,84 @@ let activeInfoWindow = null;
  * Loads and filters spots, then renders cards AND map markers
  */
 async function loadExploreSpots() {
+    toggleLoader(true, 'Finding hidden gems...');
     try {
         const category = getUrlParam('category') || 'ALL';
-        let spots;
+        const view = getUrlParam('view'); // 'map' or default (list)
+        const nearMe = getUrlParam('nearMe') === 'true';
+        const radiusParam = getUrlParam('radius');
+        const radius = radiusParam ? parseFloat(radiusParam) : 10; 
 
+        let spots;
         if (category === 'ALL') {
             spots = await api.getSpots();
         } else {
             spots = await api.getSpotsByCategory(category);
         }
 
+        // --- NEAR ME FILTERING ---
+        if (nearMe) {
+            try {
+                const userPos = await getUserLocation();
+                spots = spots
+                    .map(spot => {
+                        if (spot.latitude && spot.longitude) {
+                            spot.distance = calculateDistance(userPos.lat, userPos.lng, spot.latitude, spot.longitude);
+                        }
+                        return spot;
+                    })
+                    .filter(spot => spot.distance && parseFloat(spot.distance) <= radius)
+                    .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+
+                if (spots.length > 0) {
+                    showAlert(`Found ${spots.length} spots within ${radius}km!`);
+                } else {
+                    showAlert(`No spots found within ${radius}km of your location.`, "info");
+                }
+            } catch (err) {
+                console.error("Near Me geolocation failed:", err);
+                showAlert("Could not get your location for Near Me search.", "error");
+            }
+        }
+
         // 1. Render Cards
         renderSpots(spots, 'explore-spots-grid');
 
-        // 2. Initialize or Update Map
-        if (!exploreMap && document.getElementById('explore-map')) {
-            exploreMap = initDarkMap('explore-map', { zoom: 5 });
+        // 2. Handle Views & Map
+        const mapSection = document.getElementById('map-section');
+        const listView = document.querySelector('.explore-list-view');
 
-            // Add "Locate Me" button to the map
-            addLocateMeButton(exploreMap);
-        }
-
-        if (exploreMap) {
-            // Apply Near Me / Radius filter if requested
-            const nearMe = getUrlParam('nearMe') === 'true';
-            const radiusParam = getUrlParam('radius');
-            const radius = radiusParam ? parseFloat(radiusParam) : 10; // Default 10km
-
-            let filteredSpots = spots;
-
-            // AUTO-GEOLOCATION: Try to show user on map and filter
-            try {
-                const userPos = await getUserLocation();
-                showUserMarker(exploreMap, userPos);
-
-                if (nearMe) {
-                    // Filter spots by distance
-                    filteredSpots = spots.filter(s => {
-                        if (!s.latitude || !s.longitude) return false;
-                        const dist = calculateDistance(userPos.lat, userPos.lng, s.latitude, s.longitude);
-                        s.distance = dist; // Store for display
-                        return dist <= radius;
-                    });
-
-                    // Sort by distance (closest first)
-                    filteredSpots.sort((a, b) => a.distance - b.distance);
-
-                    // Re-render markers and grid with filtered spots
-                    renderMapMarkers(filteredSpots);
-                    renderSpots(filteredSpots, 'explore-spots-grid');
-
-                    if (radiusParam) {
-                        const title = document.getElementById('explore-title');
-                        if (title) title.innerText = `Spots within ${radius}km of you`;
-                    }
-                } else {
-                    renderMapMarkers(spots);
-                }
-
-                // Adjust map view
-                if (filteredSpots.length === 0) {
-                    exploreMap.setCenter(userPos);
-                    exploreMap.setZoom(13);
-                } else {
-                    const bounds = new google.maps.LatLngBounds();
-                    filteredSpots.forEach(s => {
-                        if (s.latitude && s.longitude) bounds.extend({ lat: s.latitude, lng: s.longitude });
-                    });
-                    bounds.extend(userPos);
-                    exploreMap.fitBounds(bounds);
-                    if (exploreMap.getZoom() > 15) exploreMap.setZoom(15);
-                }
-            } catch (err) {
-                console.log("Auto-geolocation skipped or failed:", err.message);
-                renderMapMarkers(spots); // Show all if geo fails
+        if (view === 'map') {
+            if (listView) listView.style.display = 'none';
+            if (mapSection) {
+                mapSection.classList.remove('hidden');
+                mapSection.style.marginTop = '0';
+                mapSection.querySelector('h2').innerText = 'Full Hidden Map';
+                mapSection.querySelector('button').style.display = 'none'; 
+            }
+            if (!exploreMap) exploreMap = await initDarkMap('explore-map', { zoom: 5 });
+            renderMapMarkers(spots);
+        } else if (nearMe && spots.length > 0) {
+            // Show map automatically for nearMe search results
+            if (mapSection) {
+                mapSection.classList.remove('hidden');
+                if (!exploreMap) exploreMap = await initDarkMap('explore-map', { zoom: 12 });
+                renderMapMarkers(spots);
             }
         }
 
         // Update Title
         const title = document.getElementById('explore-title');
-        if (title) title.innerText = category === 'ALL' ? 'Explore all Hidden Gems' : `Hidden ${category} Gems`;
+        if (title) {
+            let titleText = category === 'ALL' ? 'Explore all Hidden Gems' : `Hidden ${category} Gems`;
+            if (nearMe) titleText = `Spots within ${radius}km`;
+            title.innerText = titleText;
+        }
 
     } catch (error) {
         console.error('Failed to load explore spots:', error);
+    } finally {
+        toggleLoader(false);
     }
 }
 
@@ -205,22 +204,28 @@ function highlightCard(spotId) {
 /**
  * Handles clicking a card: Pans map and opens info window
  */
-function handleCardClick(spotId, lat, lng) {
+async function handleCardClick(spotId, lat, lng) {
     if (!lat || !lng) {
         navigateTo(`spot?id=${spotId}`);
         return;
     }
 
-    if (exploreMap) {
-        const pos = { lat, lng };
-        exploreMap.panTo(pos);
-        exploreMap.setZoom(15);
+    // Show Map Section
+    const mapSection = document.getElementById('map-section');
+    if (mapSection) {
+        mapSection.classList.remove('hidden');
+        mapSection.scrollIntoView({ behavior: 'smooth' });
 
-        // Find the marker for this spot and trigger click
-        const markerObj = activeMarkers.find(m => m.id === spotId);
-        if (markerObj) {
-            google.maps.event.trigger(markerObj.marker, 'click');
+        if (!exploreMap) {
+            exploreMap = await initDarkMap('explore-map', { center: { lat, lng }, zoom: 15 });
+            addLocateMeButton(exploreMap);
         }
+
+        // Find the spot to render its marker
+        api.getSpotById(spotId).then(spot => {
+            renderMapMarkers([spot]);
+            exploreMap.panTo({ lat, lng });
+        });
     } else {
         navigateTo(`spot?id=${spotId}`);
     }
@@ -356,7 +361,7 @@ async function loadSpotDetails() {
         if (spot.latitude && spot.longitude && mapContainer) {
             mapSection.classList.remove('hidden');
             const pos = { lat: spot.latitude, lng: spot.longitude };
-            const detailMap = initDarkMap('detail-map', {
+            const detailMap = await initDarkMap('detail-map', {
                 center: pos,
                 zoom: 15
             });
@@ -429,11 +434,14 @@ async function handleDeleteSpot() {
     const id = getUrlParam('id');
     if (confirm('Are you sure you want to delete this secret spot?')) {
         try {
+            toggleLoader(true, 'Deleting your secret... Please wait');
             await api.deleteSpot(id);
             showAlert('Spot deleted successfully!');
             navigateTo('explore');
         } catch (error) {
             showAlert(error.message, 'error');
+        } finally {
+            toggleLoader(false);
         }
     }
 }

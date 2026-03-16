@@ -91,26 +91,52 @@ const DARK_MAP_STYLE = [
  * @param {string} containerId - The ID of the HTML element to hold the map
  * @param {object} options - Initial map options (center, zoom, etc.)
  */
+/**
+ * Initializes a basic dark themed Google Map
+ * Returns a Promise that resolves with the Map instance
+ * @param {string} containerId - The ID of the HTML element to hold the map
+ * @param {object} options - Initial map options (center, zoom, etc.)
+ */
 function initDarkMap(containerId, options = {}) {
-    const defaultOptions = {
-        center: { lat: 20.5937, lng: 78.9629 }, // Default Center: India
-        zoom: 5,
-        styles: DARK_MAP_STYLE,
-        disableDefaultUI: true,
-        zoomControl: true,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: true,
-        fullscreenControlOptions: {
-            position: google.maps.ControlPosition.BOTTOM_RIGHT
-        },
-        gestureHandling: 'cooperative' // Fixes "zoom trap" - allows page scrolling
-    };
+    return new Promise((resolve, reject) => {
+        let retries = 10;
+        const tryInit = () => {
+            if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
+                const defaultOptions = {
+                    center: { lat: 20.5937, lng: 78.9629 }, // Default Center: India
+                    zoom: 5,
+                    styles: DARK_MAP_STYLE,
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: true,
+                    fullscreenControlOptions: {
+                        position: google.maps.ControlPosition.BOTTOM_RIGHT
+                    },
+                    gestureHandling: 'cooperative' // Fixes "zoom trap"
+                };
 
-    const container = document.getElementById(containerId);
-    if (!container) return null;
+                const container = document.getElementById(containerId);
+                if (!container) {
+                    reject(new Error(`Container #${containerId} not found`));
+                    return;
+                }
 
-    return new google.maps.Map(container, { ...defaultOptions, ...options });
+                console.log(`Map successfully initialized for: ${containerId}`);
+                const map = new google.maps.Map(container, { ...defaultOptions, ...options });
+                resolve(map);
+            } else if (retries > 0) {
+                console.warn(`Maps API not ready yet for ${containerId}. Retrying in 500ms...`);
+                retries--;
+                setTimeout(tryInit, 500);
+            } else {
+                console.error("Google Maps API failed to load after 10 attempts.");
+                reject(new Error("Maps API Timeout"));
+            }
+        };
+        tryInit();
+    });
 }
 
 /**

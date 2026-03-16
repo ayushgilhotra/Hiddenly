@@ -20,11 +20,11 @@ import java.util.function.Function;
 public class JwtUtil {
 
     // We read the secret key from application.properties
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret:HiddenlyLearningProjectSuperSecretKey2025ForBeginners}")
     private String secret;
 
-    // We read the expiration time (how long a token lasts) from application.properties
-    @Value("${jwt.expiration}")
+    // We read the expiration time from application.properties (default: 24 hours)
+    @Value("${jwt.expiration:86400000}")
     private long expiration;
 
     // Helper to get the signing key from the secret string

@@ -14,10 +14,31 @@
 
 <body>
 
-    <nav>
-        <a href="index.html" class="brand">Hiddenly</a>
-        <ul class="nav-links">
+    <!-- SIDEBAR MENU -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <span class="brand"><img src="assets/images/logo.png" alt="Logo"> Hiddenly</span>
+            <div class="hamburger" onclick="toggleSidebar(false)">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <ul class="sidebar-links">
             <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="explore.html"><i class="fas fa-search"></i> Explore</a></li>
+            <li><a href="explore.html?view=map"><i class="fas fa-map-marked-alt"></i> Full Map</a></li>
+            <li><hr style="border-color: rgba(212, 168, 83, 0.1); margin: 10px 0;"></li>
+            <li><a href="help.html"><i class="fas fa-question-circle"></i> Help Guide</a></li>
+            <li><a href="contact.html"><i class="fas fa-envelope"></i> Contact Us</a></li>
+        </ul>
+    </aside>
+
+    <nav>
+        <div class="hamburger" onclick="toggleSidebar(true)">
+            <span></span><span></span><span></span>
+        </div>
+        <a href="index.html" class="brand"><img src="assets/images/logo.png" alt="Logo"> Hiddenly</a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
             <li><a href="explore.html">Explore</a></li>
             <li><a href="login.html" class="btn-auth">Login</a></li>
         </ul>
@@ -65,11 +86,14 @@
             const password = document.getElementById('password').value;
 
             try {
+                toggleLoader(true, 'Creating account... Please wait');
                 await api.register({ name, email, password });
                 showAlert('Registration successful! You can now login.');
                 navigateTo('login');
             } catch (error) {
                 showAlert(error.message, 'error');
+            } finally {
+                toggleLoader(false);
             }
         });
     </script>

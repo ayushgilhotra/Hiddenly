@@ -22,29 +22,32 @@ function logout() {
     window.location.href = 'index.html';
 }
 
-// Update the Navbar based on login status
+// Update the Navbar and Sidebar based on login status
 function updateNavbar() {
-    const loginLink = document.getElementById('login-link');
-    const registerLink = document.getElementById('register-link');
-    const addSpotLink = document.getElementById('add-spot-link');
-    const logoutLink = document.getElementById('logout-link');
-    const userNameDisplay = document.getElementById('user-name');
+    const navAuthLinks = document.getElementById('nav-auth-links');
+    const navUserInfo = document.getElementById('nav-user-info');
+    const navUserName = document.getElementById('nav-user-name');
+    
+    // Sidebar elements
+    const sideAddSpot = document.getElementById('side-add-spot');
+    const sideLogout = document.getElementById('side-logout');
 
     if (isLoggedIn()) {
-        if (loginLink) loginLink.classList.add('hidden');
-        if (registerLink) registerLink.classList.add('hidden');
-        if (addSpotLink) addSpotLink.classList.remove('hidden');
-        if (logoutLink) logoutLink.classList.remove('hidden');
-        if (userNameDisplay) {
-            userNameDisplay.innerText = `Hello, ${localStorage.getItem('userName')}`;
-            userNameDisplay.classList.remove('hidden');
-        }
+        const user = localStorage.getItem('userName');
+        if (navAuthLinks) navAuthLinks.classList.add('hidden');
+        if (navUserInfo) navUserInfo.classList.remove('hidden');
+        if (navUserName) navUserName.innerText = `Hi, ${user}`;
+        
+        // Show sidebar auth items
+        if (sideAddSpot) sideAddSpot.classList.remove('hidden');
+        if (sideLogout) sideLogout.classList.remove('hidden');
     } else {
-        if (loginLink) loginLink.classList.remove('hidden');
-        if (registerLink) registerLink.classList.remove('hidden');
-        if (addSpotLink) addSpotLink.classList.add('hidden');
-        if (logoutLink) logoutLink.classList.add('hidden');
-        if (userNameDisplay) userNameDisplay.classList.add('hidden');
+        if (navAuthLinks) navAuthLinks.classList.remove('hidden');
+        if (navUserInfo) navUserInfo.classList.add('hidden');
+        
+        // Hide sidebar auth items
+        if (sideAddSpot) sideAddSpot.classList.add('hidden');
+        if (sideLogout) sideLogout.classList.add('hidden');
     }
 }
 

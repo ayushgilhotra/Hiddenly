@@ -33,6 +33,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // Anyone can Register or Login
                 .requestMatchers(HttpMethod.GET, "/api/spots/**").permitAll() // Anyone can browse spots
+                .requestMatchers("/api/upload/**").permitAll() // Troubleshooting: Allow uploads
                 .requestMatchers("/uploads/**").permitAll() // Allow everyone to see uploaded images
                 .anyRequest().authenticated() // Everything else (Add/Edit/Review) needs a login
             )

@@ -15,60 +15,75 @@
 
 <body>
 
+    <!-- SIDEBAR MENU -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <span class="brand"><img src="assets/images/logo.png" alt="Logo"> Hiddenly</span>
+            <div class="hamburger" onclick="toggleSidebar(false)">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <ul class="sidebar-links">
+            <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="explore.html" class="active"><i class="fas fa-search"></i> Explore</a></li>
+            <li><a href="explore.html?view=map"><i class="fas fa-map-marked-alt"></i> Full Map</a></li>
+            <li><a href="add-spot.html" id="side-add-spot" class="hidden"><i class="fas fa-plus-circle"></i> Add a Spot</a></li>
+            <li><hr style="border-color: rgba(212, 168, 83, 0.1); margin: 10px 0;"></li>
+            <li><a href="help.html"><i class="fas fa-question-circle"></i> Help Guide</a></li>
+            <li><a href="contact.html"><i class="fas fa-envelope"></i> Contact Us</a></li>
+            <li id="side-logout" class="hidden"><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </aside>
+
     <!-- NAVBAR -->
     <nav>
-        <a href="index.html" class="brand">Hiddenly</a>
+        <div class="hamburger" onclick="toggleSidebar(true)">
+            <span></span><span></span><span></span>
+        </div>
+        <a href="index.html" class="brand"><img src="assets/images/logo.png" alt="Logo"> Hiddenly</a>
         <ul class="nav-links">
-            <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
-            <li><a href="explore.html" style="color: var(--primary);">Explore</a></li>
-            <li><a href="add-spot.html" id="add-spot-link" class="hidden">Add a Spot</a></li>
-            <li><a href="login.html" id="login-link">Login</a></li>
-            <li><a href="register.html" id="register-link" class="btn-auth">Register</a></li>
-            <li id="user-name" class="hidden" style="color: var(--primary); font-weight: bold;"></li>
-            <li><a href="#" id="logout-link" class="hidden" onclick="logout()">Logout</a></li>
+            <li><a href="explore.html">Explore</a></li>
+            <li id="nav-auth-links">
+                <a href="login.html" id="login-link">Login</a>
+                <a href="register.html" id="register-link" class="btn-auth">Register</a>
+            </li>
+            <li id="nav-user-info" class="hidden">
+                 <span id="nav-user-name" style="color: var(--primary); font-size: 0.9rem; margin-right: 15px;"></span>
+                 <a href="add-spot.html" class="btn-auth">Add Spot</a>
+            </li>
         </ul>
     </nav>
 
-    <!-- SPLIT LAYOUT CONTAINER -->
-    <main class="explore-container">
-        <!-- LEFT SIDE: CARDS & FILTERS (40%) -->
-        <section class="explore-sidebar">
+    <!-- LIST-FIRST CONTAINER -->
+    <main class="container">
+        <section class="explore-list-view">
             <h1 id="explore-title">Explore Hidden Gems</h1>
 
             <!-- FILTER BAR -->
-            <div
-                style="background: var(--card-bg); padding: 15px; border-radius: var(--border-radius); margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
-                <div>
-                    <label
-                        style="display: block; margin-bottom: 5px; font-size: 0.8rem; color: var(--text-muted);">Category</label>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button class="filter-btn active" data-category="ALL"
-                            onclick="filterByCategory('ALL')">All</button>
-                        <button class="filter-btn" data-category="CAFE" onclick="filterByCategory('CAFE')">Cafe</button>
-                        <button class="filter-btn" data-category="NATURE"
-                            onclick="filterByCategory('NATURE')">Nature</button>
-                        <button class="filter-btn" data-category="FOOD" onclick="filterByCategory('FOOD')">Food</button>
-                        <button class="filter-btn" data-category="ADVENTURE"
-                            onclick="filterByCategory('ADVENTURE')">Adventure</button>
-                    </div>
-                </div>
-
-                <div style="display: none;"> <!-- Keeping budget filter hidden but functional if needed later -->
-                    <select id="filter-budget">
-                        <option value="ALL">Any Budget</option>
-                    </select>
+            <div style="background: var(--card-bg); padding: 20px; border-radius: var(--border-radius); margin-bottom: 30px; border: 1px solid rgba(212, 168, 83, 0.1);">
+                <label style="display: block; margin-bottom: 12px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Categories</label>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="filter-btn active" data-category="ALL" onclick="filterByCategory('ALL')">All</button>
+                    <button class="filter-btn" data-category="CAFE" onclick="filterByCategory('CAFE')">Cafes</button>
+                    <button class="filter-btn" data-category="NATURE" onclick="filterByCategory('NATURE')">Nature</button>
+                    <button class="filter-btn" data-category="FOOD" onclick="filterByCategory('FOOD')">Food</button>
+                    <button class="filter-btn" data-category="ADVENTURE" onclick="filterByCategory('ADVENTURE')">Adventure</button>
                 </div>
             </div>
 
-            <div id="explore-spots-grid" class="flex-column" style="display: flex; flex-direction: column; gap: 20px;">
+            <div id="explore-spots-grid" class="grid">
                 <!-- Spots will be loaded here -->
                 <p class="text-center">Loading amazing spots...</p>
             </div>
         </section>
 
-        <!-- RIGHT SIDE: LIVE MAP (60%) -->
-        <section id="explore-map" class="explore-map-container">
-            <!-- Map will be initialized here -->
+        <!-- BOTTOM MAP SECTION (Hidden until triggered) -->
+        <section id="map-section" class="hidden" style="margin-top: 50px;">
+            <h2 style="margin-bottom: 20px;">Spot Location</h2>
+            <div id="explore-map" class="map-container" style="height: 400px; width: 100%;"></div>
+            <p class="text-center mt-20">
+                <button onclick="document.getElementById('map-section').classList.add('hidden')" class="filter-btn">Close Map</button>
+            </p>
         </section>
     </main>
 
@@ -85,98 +100,17 @@
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCos3Z4n3jwzEUgUTCd1qXepgTC1jQdahE&libraries=places"></script>
 
     <script>
-        // Update the select dropdown to match the URL category
+        // Set active class on filter buttons based on URL
         document.addEventListener('DOMContentLoaded', () => {
             const cat = getUrlParam('category') || 'ALL';
             loadExploreSpots();
 
-            // Set active class on filter buttons
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                if (btn.dataset.category === cat) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+                btn.classList.toggle('active', btn.dataset.category === cat);
             });
         });
 
-        // Reload spots
-        async function loadExploreSpots() {
-            try {
-                const category = getUrlParam('category') || 'ALL';
-                const nearMe = getUrlParam('nearMe') === 'true';
-                const radiusParam = getUrlParam('radius');
-                const radius = radiusParam ? parseFloat(radiusParam) : 10; // Default 10km
-
-                let spots;
-
-                if (category === 'ALL') {
-                    spots = await api.getSpots();
-                } else {
-                    spots = await api.getSpotsByCategory(category);
-                }
-
-                // If nearMe is active, filter by distance
-                if (nearMe) {
-                    try {
-                        const userPos = await getUserLocation();
-                        spots = spots
-                            .map(spot => {
-                                if (spot.latitude && spot.longitude) {
-                                    spot.distance = calculateDistance(userPos.lat, userPos.lng, spot.latitude, spot.longitude);
-                                }
-                                return spot;
-                            })
-                            .filter(spot => spot.distance && parseFloat(spot.distance) <= radius)
-                            .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
-
-                        // Show a status alert
-                        if (spots.length > 0) {
-                            showAlert(`Found ${spots.length} spots within ${radius}km!`);
-                        } else {
-                            showAlert(`No spots found within ${radius}km of your location.`, "info");
-                        }
-                    } catch (err) {
-                        console.error("Near Me geolocation failed:", err);
-                        showAlert("Could not get your location for Near Me search.", "error");
-                    }
-                }
-
-                // 1. Render Cards
-                renderSpots(spots, 'explore-spots-grid');
-
-                // 2. Initialize or Update Map
-                if (!exploreMap && document.getElementById('explore-map')) {
-                    exploreMap = initDarkMap('explore-map', { zoom: 5 });
-                    addLocateMeButton(exploreMap);
-                }
-
-                if (exploreMap) {
-                    renderMapMarkers(spots);
-                }
-
-                // Update Title
-                const title = document.getElementById('explore-title');
-                if (title) {
-                    let titleText = category === 'ALL' ? 'Explore all Hidden Gems' : `Hidden ${category} Gems`;
-                    if (nearMe) titleText = `Spots within ${radius}km`;
-                    title.innerText = titleText;
-                }
-
-            } catch (error) {
-                console.error('Failed to load explore spots:', error);
-            }
-        }
-
-        // --- GLOBAL OVERRIDE ---
-        // We override the one in spots.js because we need parameters specific to this page
-        window.loadExploreSpots = loadExploreSpots;
-
-        /**
-         * Filter spots by category and update UI
-         */
         function filterByCategory(cat) {
-            // Keep nearMe param if it exists
             const nearMe = getUrlParam('nearMe');
             let query = `?category=${cat}`;
             if (nearMe) query += `&nearMe=${nearMe}`;
@@ -184,12 +118,10 @@
             const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + query;
             window.history.pushState({ path: newUrl }, '', newUrl);
 
-            // Update UI buttons
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.category === cat);
             });
 
-            // Reload spots
             loadExploreSpots();
         }
     </script>

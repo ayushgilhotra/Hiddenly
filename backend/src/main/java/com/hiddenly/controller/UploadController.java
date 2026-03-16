@@ -35,7 +35,7 @@ public class UploadController {
             Path path = root.resolve(filename);
 
             // Save file
-            Files.copy(file.getInputStream(), path);
+            Files.copy(file.getInputStream(), path, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
             // Dynamically get the current server URL (localhost for local, render for production)
             String fileUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -46,6 +46,8 @@ public class UploadController {
             return ResponseEntity.ok().body("{\"imageUrl\": \"" + fileUrl + "\"}");
 
         } catch (IOException e) {
+            System.err.println("Upload error: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Could not upload file: " + e.getMessage());
         }
     }

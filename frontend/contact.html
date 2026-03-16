@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | Hiddenly</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- SIDEBAR MENU -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <span class="brand"><img src="assets/images/logo.png" alt="Logo"> Hiddenly</span>
+            <div class="hamburger" onclick="toggleSidebar(false)">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <ul class="sidebar-links">
+            <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="explore.html"><i class="fas fa-search"></i> Explore</a></li>
+            <li><a href="explore.html?view=map"><i class="fas fa-map-marked-alt"></i> Full Map</a></li>
+            <li><a href="add-spot.html" id="side-add-spot" class="hidden"><i class="fas fa-plus-circle"></i> Add a Spot</a></li>
+            <li><hr style="border-color: rgba(212, 168, 83, 0.1); margin: 10px 0;"></li>
+            <li><a href="help.html"><i class="fas fa-question-circle"></i> Help Guide</a></li>
+            <li><a href="contact.html" class="active"><i class="fas fa-envelope"></i> Contact Us</a></li>
+            <li id="side-logout" class="hidden"><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </aside>
+
+    <nav>
+        <div class="hamburger" onclick="toggleSidebar(true)">
+            <span></span><span></span><span></span>
+        </div>
+        <a href="index.html" class="brand"><img src="assets/images/logo.png" alt="Logo"> Hiddenly</a>
+        <ul class="nav-links">
+            <li><a href="explore.html">Explore</a></li>
+            <li id="nav-auth-links">
+                <a href="login.html" id="login-link">Login</a>
+                <a href="register.html" id="register-link" class="btn-auth">Register</a>
+            </li>
+            <li id="nav-user-info" class="hidden">
+                 <span id="nav-user-name" style="color: var(--primary); font-size: 0.9rem; margin-right: 15px;"></span>
+                 <a href="add-spot.html" class="btn-auth">Add Spot</a>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="container" style="max-width: 600px; padding-top: 50px;">
+        <h1 class="text-center" style="margin-bottom: 40px;">Get in Touch</h1>
+        
+        <div style="background: var(--card-bg); padding: 40px; border-radius: var(--border-radius); border: 1px solid rgba(212, 168, 83, 0.1);">
+            <div class="text-center" style="margin-bottom: 30px;">
+                <i class="fas fa-paper-plane" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;"></i>
+                <p style="color: var(--text-muted);">Have a question? Spotted a bug? We'd love to hear from you. Drop us a message!</p>
+            </div>
+
+            <form id="contact-form" onsubmit="event.preventDefault(); showAlert('Thanks! We will get back to you soon.', 'success');">
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" placeholder="Explorer" required>
+                </div>
+                <div class="form-group">
+                    <label>Your Email</label>
+                    <input type="email" placeholder="explorer@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea placeholder="Tell us what's on your mind..." style="height: 150px;" required></textarea>
+                </div>
+                <button type="submit" class="btn-auth" style="width: 100%; padding: 12px;">Send Message</button>
+            </form>
+
+            <div class="text-center" style="margin-top: 30px; border-top: 1px solid rgba(212, 168, 83, 0.1); padding-top: 20px;">
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Or email us directly at:</p>
+                <a href="mailto:2319959.cse.coe@gmail.com" style="color: var(--primary); font-weight: bold;">2319959.cse.coe@gmail.com</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center" style="padding: 40px; color: var(--text-muted); border-top: 1px solid rgba(212, 168, 83, 0.1); margin-top: 80px;">
+        <p>&copy; 2025 Hiddenly. Built for explorers.</p>
+    </footer>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

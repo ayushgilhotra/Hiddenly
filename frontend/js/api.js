@@ -1,8 +1,11 @@
 // This file connects our frontend to our Spring Boot backend
 // Automatically use localhost for development, and the live Render URL for production.
-const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const IS_LOCAL = window.location.hostname === 'localhost' || 
+                 window.location.hostname === '127.0.0.1' || 
+                 window.location.hostname.startsWith('192.168.') || 
+                 window.location.hostname.startsWith('10.');
 const PRODUCTION_API_URL = 'https://hiddenly.onrender.com/api'; // Live Render URL
-const API_BASE_URL = IS_LOCAL ? 'http://localhost:8080/api' : PRODUCTION_API_URL;
+const API_BASE_URL = IS_LOCAL ? `http://${window.location.hostname}:8080/api` : PRODUCTION_API_URL;
 
 // Helper function to handle fetch and errors in one place
 async function apiCall(endpoint, method = 'GET', body = null, authenticated = false) {
@@ -32,19 +35,17 @@ async function apiCall(endpoint, method = 'GET', body = null, authenticated = fa
 
     try {
         // 5. Send the request
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+        const url = `${API_BASE_URL}${endpoint}`;
+        const response = await fetch(url, options);
 
         // 6. Check if response is successful
         if (!response.ok) {
-            // If the error is 401 (Unauthorized) or 403 (Forbidden), 
-            // it means our token is old, invalid, or missing.
             if (response.status === 401 || response.status === 403) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('userName');
 
-                // Only redirect if we are not already on the login page
                 if (!window.location.href.includes('login.html')) {
-                    alert('Session expired. Please login again.');
+                    showAlert('Session expired. Please login again.', 'error');
                     window.location.href = 'login.html';
                 }
             }
@@ -52,17 +53,13 @@ async function apiCall(endpoint, method = 'GET', body = null, authenticated = fa
             const errorText = await response.text();
             let errorMessage = errorText;
             try {
-                // Try to parse the error as JSON just in case the backend sent an object
                 const errorJson = JSON.parse(errorText);
                 errorMessage = errorJson.message || errorText;
-            } catch (e) {
-                // If it fails to parse, it's just a raw text string (like "Email already registered!")
-            }
+            } catch (e) {}
             
             throw new Error(errorMessage || 'API request failed');
         }
 
-        // 7. Parse JSON if there is content
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.indexOf("application/json") !== -1) {
             return await response.json();
@@ -70,8 +67,12 @@ async function apiCall(endpoint, method = 'GET', body = null, authenticated = fa
             return await response.text();
         }
     } catch (error) {
+        if (error.message === 'Failed to fetch') {
+            console.error('Connection Error:', `Could not connect to ${API_BASE_URL}. Ensure the backend is running and matches this URL.`);
+            throw new Error(`Connection Error: Ensure your backend is running at ${API_BASE_URL}`);
+        }
         console.error('API Error:', error.message);
-        throw error; // Let the caller handle it
+        throw error;
     }
 }
 
@@ -107,8 +108,15 @@ const api = {
         });
 
         if (!response.ok) {
-            const err = await response.text();
-            throw new Error(err || 'Upload failed');
+            const errorText = await response.text();
+            let errorMessage = errorText;
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorMessage = errorJson.message || errorText;
+            } catch (e) {
+                // Not JSON, use raw text
+            }
+            throw new Error(errorMessage || `Upload failed with status ${response.status}`);
         }
 
         return await response.json();
