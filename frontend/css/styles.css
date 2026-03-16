@@ -570,7 +570,7 @@ button:hover {
 
 /* ===== MOBILE RESPONSIVE TWEAKS ===== */
 @media (max-width: 768px) {
-    /* Navbar row layout */
+    /* Navbar layout */
     nav {
         flex-direction: row;
         justify-content: space-between;
@@ -578,42 +578,62 @@ button:hover {
         padding: 5px 15px;
         height: 70px;
     }
+
+    /* Group hamburger and brand on the left using margin-right: auto on the brand */
+    .brand {
+        margin-right: auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
     
     .nav-links {
-        display: none; /* Hide main links on mobile, use sidebar instead */
+        display: flex; /* Show nav links but filter them */
+        gap: 10px;
+        margin-left: 10px;
+    }
+
+    /* Hide individual links that are in the sidebar already */
+    .nav-links > li:not(#nav-auth-links):not(#nav-user-info) {
+        display: none;
+    }
+
+    /* Style the auth buttons for mobile compactness */
+    .nav-links a {
+        font-size: 0.85rem;
+        padding: 5px 10px;
+    }
+
+    .btn-auth {
+        padding: 5px 12px;
     }
     
     .hamburger {
         display: flex;
+        margin-right: 5px;
+    }
+
+    .brand {
+        font-size: 1.1rem;
     }
 
     .brand img {
-        height: 45px; /* Slightly smaller but still clear on mobile */
+        height: 40px; 
     }
     
     /* Hero Section */
     .hero {
         padding: 40px 5%;
-        min-height: 50vh;
-        height: auto;
-    }
-    
-    .hero h1 {
-        font-size: 2.2rem;
-        line-height: 1.1;
-    }
-    
-    /* Hero Section */
-    .hero {
-        padding: 50px 8%;
         min-height: 45vh;
         height: auto;
     }
     
     .hero h1 {
-        font-size: 2rem;
-        line-height: 1.2;
+        font-size: 2.1rem;
+        line-height: 1.1;
     }
+    
+
     
     .hero p {
         font-size: 0.95rem;
