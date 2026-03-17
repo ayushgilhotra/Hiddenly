@@ -1,11 +1,21 @@
-// This file connects our frontend to our Spring Boot backend
 // Automatically use localhost for development, and the live Render URL for production.
 const IS_LOCAL = window.location.hostname === 'localhost' || 
                  window.location.hostname === '127.0.0.1' || 
                  window.location.hostname.startsWith('192.168.') || 
                  window.location.hostname.startsWith('10.');
-const PRODUCTION_API_URL = 'https://hiddenly.onrender.com/api'; // Live Render URL
+
+// IMPORTANT: This is your live backend URL on Render.
+const PRODUCTION_API_URL = 'https://hiddenly.onrender.com/api'; 
+
+// Decide which URL to use based on where the browser is running
 const API_BASE_URL = IS_LOCAL ? `http://${window.location.hostname}:8080/api` : PRODUCTION_API_URL;
+
+// --- PROACTIVE WARMUP ---
+// Render free tier "sleeps" if not used for 15 mins. This ping wakes it up early.
+if (!IS_LOCAL) {
+    console.log("Live site detected. Warming up Render server...");
+    fetch(PRODUCTION_API_URL + '/spots').catch(() => {});
+}
 
 // Helper function to handle fetch and errors in one place
 async function apiCall(endpoint, method = 'GET', body = null, authenticated = false) {
@@ -68,8 +78,12 @@ async function apiCall(endpoint, method = 'GET', body = null, authenticated = fa
         }
     } catch (error) {
         if (error.message === 'Failed to fetch') {
-            console.error('Connection Error:', `Could not connect to ${API_BASE_URL}. Ensure the backend is running and matches this URL.`);
-            throw new Error(`Connection Error: Ensure your backend is running at ${API_BASE_URL}`);
+            const msg = IS_LOCAL 
+                ? `Cannot connect to local backend at ${API_BASE_URL}. Ensure your computer is running the Spring Boot app.`
+                : `Connecting to live server... Render might be waking up (it takes ~1 minute if inactive). Please try again in a moment.`;
+            
+            console.error('Connection Error:', msg);
+            throw new Error(msg);
         }
         console.error('API Error:', error.message);
         throw error;
