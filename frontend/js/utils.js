@@ -8,7 +8,17 @@ function getUrlParam(name) {
 
 // Redirect to another internal page
 function navigateTo(page) {
-    window.location.href = page + (page.includes('.html') ? '' : '.html');
+    if (page.includes('.html')) {
+        window.location.href = page;
+        return;
+    }
+    
+    // Split by '?' to handle query params
+    const parts = page.split('?');
+    const path = parts[0];
+    const query = parts[1] ? '?' + parts[1] : '';
+    
+    window.location.href = path + '.html' + query;
 }
 
 // Show a beautiful custom Toast message instead of native alert
