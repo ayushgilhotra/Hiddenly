@@ -421,10 +421,12 @@ async function loadSpotDetails() {
             console.error('Error parsing token:', e);
         }
 
-        // If the logged-in user is the owner, show the Edit/Delete buttons
+        // If the logged-in user is the owner (or admin abc@gmail.com), show the Edit/Delete buttons
         // We compare case-insensitively just to be extremely safe
-        if (currentUserEmail && spot.addedBy.email &&
-            currentUserEmail.toLowerCase() === spot.addedBy.email.toLowerCase()) {
+        if (currentUserEmail && (
+            (spot.addedBy.email && currentUserEmail.toLowerCase() === spot.addedBy.email.toLowerCase()) ||
+            currentUserEmail.toLowerCase() === 'abc@gmail.com'
+        )) {
 
             const ownerControls = document.getElementById('owner-controls');
             if (ownerControls) {
