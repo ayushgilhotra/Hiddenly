@@ -116,7 +116,7 @@ public class SpotService {
         Spot spot = getSpotById(id);
 
         // Security Check: Only the person who added it can edit it (or admin abc@gmail.com)
-        if (!spot.getAddedBy().getEmail().equals(userEmail) && !userEmail.equals("abc@gmail.com")) {
+        if (!spot.getAddedBy().getEmail().equalsIgnoreCase(userEmail.trim()) && !userEmail.trim().equalsIgnoreCase("abc@gmail.com")) {
             throw new RuntimeException("You are not authorized to edit this spot!");
         }
 
@@ -144,7 +144,7 @@ public class SpotService {
         Spot spot = getSpotById(id);
 
         // Security Check: Only the person who added it can delete it (or admin abc@gmail.com)
-        if (!spot.getAddedBy().getEmail().equals(userEmail) && !userEmail.equals("abc@gmail.com")) {
+        if (!spot.getAddedBy().getEmail().equalsIgnoreCase(userEmail.trim()) && !userEmail.trim().equalsIgnoreCase("abc@gmail.com")) {
             throw new RuntimeException("You are not authorized to delete this spot!");
         }
 
