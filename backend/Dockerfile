@@ -11,4 +11,4 @@ WORKDIR /app
 # Copy the built jar file from the build stage
 COPY --from=build /app/target/backend-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["sh", "-c", "java -jar app.jar --spring.profiles.active=${SPRING_PROFILES_ACTIVE:-default} --spring.datasource.url=${DB_HOST:-jdbc:h2:file:./data/hiddenly_db} --spring.datasource.username=${DB_USER:-sa} --spring.datasource.password=${DB_PASSWORD:-} --spring.datasource.url=jdbc:mysql://${DB_HOST:-localhost}:${DB_PORT:-3306}/${DB_NAME:-hiddenly_db}?createDatabaseIfNotExist=true"]
+ENTRYPOINT ["sh", "-c", "java -jar app.jar --spring.profiles.active=${SPRING_PROFILES_ACTIVE:-default} --spring.datasource.url=jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?createDatabaseIfNotExist=true --spring.datasource.username=${DB_USER} --spring.datasource.password=${DB_PASSWORD}"]
